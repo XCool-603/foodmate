@@ -45,13 +45,17 @@
 ### 方式一：Docker 一键部署（推荐）
 
 ```bash
-git clone <仓库地址> foodmate && cd foodmate
+git clone https://github.com/XCool-603/foodmate.git && cd foodmate
 ./deploy/deploy.sh
 ```
 
 脚本会自动生成随机密钥、构建镜像、启动 API + PostgreSQL，并等到健康检查通过才宣告成功。
 
 Windows 用 `.\deploy\deploy.ps1`。
+
+> ⚠️ **Docker 配置尚未经实际构建验证** —— 开发机未安装 Docker。
+> 应用本身（314 个测试、五条端到端链路）已验证，但 `docker build` 未跑过。
+> 详见 [部署手册的验证状态说明](docs/DEPLOY.md#️-关于验证状态)。
 
 **一键升级**：
 
@@ -388,6 +392,16 @@ dotnet test
     `Get-Content` + `Set-Content` / `WriteAllText` 组合。**
     确需脚本处理时，必须显式指定编码：
     `[System.IO.File]::ReadAllText($p, [System.Text.Encoding]::UTF8)`。
+
+22. **`RUN chown -R` 应该写成 `COPY --chown`** ——
+    镜像里始终有**两套身份**：构建期的 root 和运行期的非 root 用户。
+    `COPY` 出来的文件默认属主是 `root:root`，运行期用户写不了；
+    用 `RUN chown -R` 补救会**多生成一整个数据层**（镜像更大、构建更慢），
+    而且顺序写错（chown 之后再 COPY）就完全失效。
+    正确做法是 `COPY --chown=foodmate:foodmate`，
+    镜像内**新建**的目录才单独用 `RUN install -d -o foodmate -g foodmate`。
+    这也是 compose 里命名卷属主能对齐的前提 —— 命名卷首次创建时会连同
+    镜像中该路径的属主一起复制，挂载点必须在镜像里就已存在且属主正确。
 
 ---
 

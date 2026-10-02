@@ -4,6 +4,29 @@
 
 ---
 
+## ⚠️ 关于验证状态
+
+**本手册里的 Docker 配置尚未经过实际 `docker build` / `docker compose up` 验证。**
+
+开发这套代码的机器上未安装 Docker，因此：
+
+| 已验证 | 未验证 |
+|---|---|
+| ✅ 应用本身：314 个测试全绿，五条链路端到端跑通 | ❌ `docker build` 能否成功 |
+| ✅ EF 迁移产出的 PostgreSQL DDL（`uuid` / `timestamptz` / 26 个索引） | ❌ 容器内非 root 用户的实际文件权限 |
+| ✅ `.dockerignore` 未排除构建所需文件 | ❌ compose 变量插值与健康检查时序 |
+| ✅ `.gitattributes` 保证 `.sh` 在 Linux 上是 LF | ❌ 首次启动的端到端耗时 |
+
+**首次部署时请留意构建输出。** 如果撞到问题，最可能出在这几处：
+
+1. **基础镜像 tag** —— `mcr.microsoft.com/dotnet/aspnet:10.0` 若不存在，换成实际可用的 tag
+2. **`install -d` 与 `useradd` 的参数** —— 不同发行版参数有差异（当前用的是 Debian 系）
+3. **健康检查的 `start-period`** —— 首次启动要跑迁移 + 导种子数据，30 秒可能不够
+
+遇到报错请把 `docker compose logs api` 的输出贴出来。
+
+---
+
 ## 1. 前置条件
 
 | 项目 | 要求 |
