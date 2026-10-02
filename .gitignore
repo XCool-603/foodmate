@@ -1,0 +1,43 @@
+# ── .NET ──────────────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+foodmate*.db*
+
+# ── 用户上传的图片（本地存储实现）──────────────────────
+src/FoodMate.Api/wwwroot/uploads/
+
+# ── Node / uni-app ────────────────────────────────────
+node_modules/
+dist/
+unpackage/
+.pnpm-store/
+
+# ── 环境与密钥 ────────────────────────────────────────
+appsettings.Production.json
+appsettings.Local.json
+.env
+.env.local
+*.pfx
+secrets.json
+
+# ── 部署产物 ──────────────────────────────────────────
+backups/
+*.sql
+*.sql.gz
+
+# ── IDE / OS ──────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# ── 日志 ──────────────────────────────────────────────
+logs/
+*.log

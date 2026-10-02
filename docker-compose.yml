@@ -1,0 +1,125 @@
+# ─────────────────────────────────────────────────────────────
+#  美食伴侣 · 一键部署编排
+#
+#  用法：
+#     cp .env.example .env    # 然后填写密钥（或直接跑 deploy/deploy.sh 自动生成）
+#     docker compose up -d
+#
+#  升级：deploy/upgrade.sh
+#  查看日志：docker compose logs -f api
+# ─────────────────────────────────────────────────────────────
+name: foodmate
+
+services:
+  # ── API ────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: foodmate-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+
+    ports:
+      - "${API_PORT:-8080}:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+      # ── 数据库 ──────────────────────────────────────────
+      Database__Provider: PostgreSql
+      ConnectionStrings__Default: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB:-foodmate};
+        Username=${POSTGRES_USER:-foodmate};Password=${POSTGRES_PASSWORD:?必须设置 POSTGRES_PASSWORD}
+
+      # ── 认证 ────────────────────────────────────────────
+      # 生产环境必须显式配置签名密钥（≥32 字节），否则启动直接失败
+      Auth__Jwt__SigningKey: ${JWT_SIGNING_KEY:?必须设置 JWT_SIGNING_KEY}
+      Auth__Jwt__AccessTokenMinutes: ${ACCESS_TOKEN_MINUTES:-120}
+      Auth__Jwt__RefreshTokenDays: ${REFRESH_TOKEN_DAYS:-30}
+      # 游客登录在生产环境默认关闭：游客身份无法跨设备恢复
+      Auth__AllowGuestLogin: ${ALLOW_GUEST_LOGIN:-false}
+
+      Auth__WeChat__AppId: ${WECHAT_APPID:-}
+      Auth__WeChat__AppSecret: ${WECHAT_SECRET:-}
+
+      Auth__Alipay__AppId: ${ALIPAY_APPID:-}
+      Auth__Alipay__AppSecret: ${ALIPAY_SECRET:-}
+      Auth__Alipay__PrivateKey: ${ALIPAY_PRIVATE_KEY:-}
+
+      Auth__Douyin__AppId: ${DOUYIN_APPID:-}
+      Auth__Douyin__AppSecret: ${DOUYIN_SECRET:-}
+
+      # ── AI ──────────────────────────────────────────────
+      Ai__Provider: ${AI_PROVIDER:-Stub}
+      Ai__BaseUrl: ${AI_BASE_URL:-}
+      Ai__ApiKey: ${AI_API_KEY:-}
+      Ai__VisionModel: ${AI_VISION_MODEL:-qwen-vl-max}
+      Ai__TextModel: ${AI_TEXT_MODEL:-deepseek-chat}
+
+    volumes:
+      # 用户上传的图片。生产环境建议换成对象存储，这里的卷只是兜底
+      - uploads:/app/wwwroot/uploads
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    networks: [foodmate]
+
+  # ── PostgreSQL ─────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-foodmate}
+      POSTGRES_USER: ${POSTGRES_USER:-foodmate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?必须设置 POSTGRES_PASSWORD}
+      # 中文内容用 UTF8；排序规则交给应用层，数据库保持默认最快
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+    # 默认不对宿主机暴露数据库端口。
+    # 需要从外部连（如 DBeaver 调试）时取消注释，并确保防火墙不放行：
+    # ports:
+    #   - "127.0.0.1:5432:5432"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-foodmate} -d ${POSTGRES_DB:-foodmate}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    networks: [foodmate]
+
+volumes:
+  pgdata:
+    driver: local
+  uploads:
+    driver: local
+
+networks:
+  foodmate:
+    driver: bridge

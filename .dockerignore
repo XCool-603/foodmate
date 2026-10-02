@@ -1,0 +1,53 @@
+# 构建上下文瘦身：这些都不该进镜像
+
+# ── 版本控制与文档 ────────────────────────────────────────
+.git
+.gitignore
+.github
+docs
+README.md
+*.md
+
+# ── .NET 构建产物 ─────────────────────────────────────────
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+
+# ── 数据库文件（开发库绝不进镜像）─────────────────────────
+*.db
+*.db-shm
+*.db-wal
+foodmate*.db*
+
+# ── 用户上传的图片 ────────────────────────────────────────
+src/FoodMate.Api/wwwroot/uploads/
+
+# ── 前端（API 镜像不需要）─────────────────────────────────
+web/
+node_modules/
+
+# ── 本地配置与密钥 ────────────────────────────────────────
+.env
+.env.local
+appsettings.Production.json
+appsettings.Local.json
+secrets.json
+*.pfx
+*.key
+
+# ── 测试 ──────────────────────────────────────────────────
+tests/
+
+# ── 部署脚本 ──────────────────────────────────────────────
+deploy/
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# ── 其它 ──────────────────────────────────────────────────
+logs/
+*.log
+.DS_Store
+Thumbs.db

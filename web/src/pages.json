@@ -1,0 +1,80 @@
+{
+  "pages": [
+    {
+      "path": "pages/decide/index",
+      "style": {
+        "navigationBarTitleText": "今天吃什么"
+      }
+    },
+    {
+      "path": "pages/decide/result",
+      "style": {
+        "navigationBarTitleText": "为你挑了这些",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/records/index",
+      "style": {
+        "navigationBarTitleText": "我的记录",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/records/edit",
+      "style": {
+        "navigationBarTitleText": "记一顿"
+      }
+    },
+    {
+      "path": "pages/ai/recognize",
+      "style": {
+        "navigationBarTitleText": "拍照识别"
+      }
+    },
+    {
+      "path": "pages/ai/confirm",
+      "style": {
+        "navigationBarTitleText": "确认识别结果"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/mine/preference",
+      "style": {
+        "navigationBarTitleText": "口味画像"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "美食伴侣",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F6F8"
+  },
+  "tabBar": {
+    "color": "#9AA0A6",
+    "selectedColor": "#FF6B35",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/decide/index",
+        "text": "吃什么"
+      },
+      {
+        "pagePath": "pages/records/index",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  }
+}

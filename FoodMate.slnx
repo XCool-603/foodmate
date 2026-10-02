@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FoodMate.Api/FoodMate.Api.csproj" />
+    <Project Path="src/FoodMate.Contracts/FoodMate.Contracts.csproj" />
+    <Project Path="src/FoodMate.Core/FoodMate.Core.csproj" />
+    <Project Path="src/FoodMate.Infrastructure/FoodMate.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FoodMate.Core.Tests/FoodMate.Core.Tests.csproj" />
+    <Project Path="tests/FoodMate.Infrastructure.Tests/FoodMate.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

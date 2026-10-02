@@ -1,0 +1,479 @@
+[
+  {
+    "name": "番茄牛腩",
+    "aliases": ["西红柿炖牛腩", "番茄炖牛肉"],
+    "cuisine": 1,
+    "category": 2,
+    "spicyLevel": 1,
+    "priceMinCents": 3200,
+    "priceMaxCents": 4800,
+    "calories": 420,
+    "ingredients": [
+      { "name": "牛腩", "amount": "500g", "isCommonAllergen": false },
+      { "name": "番茄", "amount": "3个", "isCommonAllergen": false },
+      { "name": "洋葱", "amount": "半个", "isCommonAllergen": false }
+    ],
+    "tags": ["下饭", "暖胃", "炖菜"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "酸甜开胃，牛腩软烂，汤汁拌饭一绝",
+    "popularity": 88,
+    "recipe": {
+      "servings": 2,
+      "cookMinutes": 90,
+      "difficulty": 2,
+      "steps": [
+        { "order": 1, "text": "牛腩切块冷水下锅，加姜片料酒焯水 3 分钟，捞出温水洗净", "durationMinutes": 3 },
+        { "order": 2, "text": "番茄顶部划十字，开水烫 30 秒去皮切块", "durationMinutes": 2 },
+        { "order": 3, "text": "热锅冷油下洋葱炒软，加番茄炒出汁", "durationMinutes": 5 },
+        { "order": 4, "text": "下牛腩翻炒，加热水没过食材，大火烧开转小火炖 60 分钟", "durationMinutes": 60 },
+        { "order": 5, "text": "加盐调味，大火收汁 5 分钟", "durationMinutes": 5 }
+      ],
+      "tips": "一定要加热水，冷水会让牛腩肉质变紧"
+    }
+  },
+  {
+    "name": "宫保鸡丁",
+    "aliases": ["宫爆鸡丁"],
+    "cuisine": 1,
+    "category": 2,
+    "spicyLevel": 3,
+    "priceMinCents": 2800,
+    "priceMaxCents": 4200,
+    "calories": 480,
+    "ingredients": [
+      { "name": "鸡腿肉", "amount": "300g", "isCommonAllergen": false },
+      { "name": "花生米", "amount": "50g", "isCommonAllergen": true },
+      { "name": "干辣椒", "amount": "8个", "isCommonAllergen": false }
+    ],
+    "tags": ["下饭", "重口"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "糊辣荔枝味，鸡丁滑嫩，花生香脆",
+    "popularity": 92
+  },
+  {
+    "name": "麻婆豆腐",
+    "aliases": [],
+    "cuisine": 1,
+    "category": 3,
+    "spicyLevel": 3,
+    "priceMinCents": 1800,
+    "priceMaxCents": 2800,
+    "calories": 260,
+    "ingredients": [
+      { "name": "嫩豆腐", "amount": "400g", "isCommonAllergen": true },
+      { "name": "牛肉末", "amount": "80g", "isCommonAllergen": false },
+      { "name": "豆瓣酱", "amount": "1勺", "isCommonAllergen": true }
+    ],
+    "tags": ["下饭", "重口", "快手"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "麻辣鲜香，豆腐嫩滑，最下饭的一道素菜",
+    "popularity": 90
+  },
+  {
+    "name": "白切鸡",
+    "aliases": ["白斩鸡"],
+    "cuisine": 2,
+    "category": 2,
+    "spicyLevel": 0,
+    "priceMinCents": 3800,
+    "priceMaxCents": 5800,
+    "calories": 350,
+    "ingredients": [
+      { "name": "三黄鸡", "amount": "半只", "isCommonAllergen": false },
+      { "name": "姜", "amount": "1块", "isCommonAllergen": false }
+    ],
+    "tags": ["清淡", "宴客"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "皮爽肉滑，蘸姜葱蓉最能吃出鸡的本味",
+    "popularity": 78
+  },
+  {
+    "name": "清蒸鲈鱼",
+    "aliases": ["蒸鲈鱼"],
+    "cuisine": 2,
+    "category": 2,
+    "spicyLevel": 0,
+    "priceMinCents": 4200,
+    "priceMaxCents": 6800,
+    "calories": 220,
+    "ingredients": [
+      { "name": "鲈鱼", "amount": "1条", "isCommonAllergen": false },
+      { "name": "蒸鱼豉油", "amount": "2勺", "isCommonAllergen": true }
+    ],
+    "tags": ["清淡", "高蛋白", "宴客"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "鲜嫩无腥，少油少盐，减脂期也能放心吃",
+    "popularity": 82
+  },
+  {
+    "name": "干炒牛河",
+    "aliases": ["炒河粉"],
+    "cuisine": 2,
+    "category": 1,
+    "spicyLevel": 0,
+    "priceMinCents": 2200,
+    "priceMaxCents": 3500,
+    "calories": 620,
+    "ingredients": [
+      { "name": "河粉", "amount": "300g", "isCommonAllergen": false },
+      { "name": "牛肉", "amount": "150g", "isCommonAllergen": false },
+      { "name": "豆芽", "amount": "100g", "isCommonAllergen": false }
+    ],
+    "tags": ["快手", "主食", "夜宵"],
+    "mealTimes": 14,
+    "seasons": 0,
+    "description": "镬气十足，河粉根根分明不粘连",
+    "popularity": 80
+  },
+  {
+    "name": "剁椒鱼头",
+    "aliases": [],
+    "cuisine": 3,
+    "category": 2,
+    "spicyLevel": 4,
+    "priceMinCents": 4800,
+    "priceMaxCents": 7800,
+    "calories": 380,
+    "ingredients": [
+      { "name": "胖头鱼头", "amount": "1个", "isCommonAllergen": false },
+      { "name": "剁椒", "amount": "100g", "isCommonAllergen": false }
+    ],
+    "tags": ["重口", "宴客", "下饭"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "鲜辣过瘾，鱼头嫩滑，配面条拌汤汁绝了",
+    "popularity": 76
+  },
+  {
+    "name": "农家小炒肉",
+    "aliases": ["小炒肉", "辣椒炒肉"],
+    "cuisine": 3,
+    "category": 2,
+    "spicyLevel": 3,
+    "priceMinCents": 2600,
+    "priceMaxCents": 3800,
+    "calories": 520,
+    "ingredients": [
+      { "name": "五花肉", "amount": "250g", "isCommonAllergen": false },
+      { "name": "螺丝椒", "amount": "6个", "isCommonAllergen": false }
+    ],
+    "tags": ["下饭", "重口", "快手"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "湘菜之魂，辣椒的香辣全逼进肉里",
+    "popularity": 87
+  },
+  {
+    "name": "西红柿炒蛋",
+    "aliases": ["番茄炒蛋", "西红柿炒鸡蛋"],
+    "cuisine": 0,
+    "category": 3,
+    "spicyLevel": 0,
+    "priceMinCents": 1200,
+    "priceMaxCents": 2000,
+    "calories": 210,
+    "ingredients": [
+      { "name": "番茄", "amount": "2个", "isCommonAllergen": false },
+      { "name": "鸡蛋", "amount": "3个", "isCommonAllergen": true }
+    ],
+    "tags": ["清淡", "快手", "家常", "下饭"],
+    "mealTimes": 15,
+    "seasons": 0,
+    "description": "国民家常菜，酸甜下饭，十分钟搞定",
+    "popularity": 95,
+    "recipe": {
+      "servings": 2,
+      "cookMinutes": 10,
+      "difficulty": 1,
+      "steps": [
+        { "order": 1, "text": "鸡蛋打散加少许盐，番茄切块", "durationMinutes": 2 },
+        { "order": 2, "text": "热锅多油，倒入蛋液炒至刚凝固盛出", "durationMinutes": 2 },
+        { "order": 3, "text": "锅内留底油下番茄，中火炒出汁水", "durationMinutes": 3 },
+        { "order": 4, "text": "倒回鸡蛋，加盐和一点糖翻炒均匀出锅", "durationMinutes": 1 }
+      ],
+      "tips": "炒蛋要油多火大，蛋才蓬松；番茄加一点糖能提鲜"
+    }
+  },
+  {
+    "name": "青椒土豆丝",
+    "aliases": ["炒土豆丝"],
+    "cuisine": 0,
+    "category": 3,
+    "spicyLevel": 1,
+    "priceMinCents": 1000,
+    "priceMaxCents": 1800,
+    "calories": 180,
+    "ingredients": [
+      { "name": "土豆", "amount": "2个", "isCommonAllergen": false },
+      { "name": "青椒", "amount": "1个", "isCommonAllergen": false }
+    ],
+    "tags": ["快手", "家常", "下饭"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "酸辣爽脆，最考验刀工的家常菜",
+    "popularity": 85,
+    "recipe": {
+      "servings": 2,
+      "cookMinutes": 15,
+      "difficulty": 1,
+      "steps": [
+        { "order": 1, "text": "土豆切细丝，清水冲洗两遍去淀粉，泡水备用", "durationMinutes": 6 },
+        { "order": 2, "text": "青椒切丝，蒜切末，干辣椒剪段", "durationMinutes": 2 },
+        { "order": 3, "text": "热锅冷油爆香蒜末干辣椒", "durationMinutes": 1 },
+        { "order": 4, "text": "沥干土豆丝下锅，大火快炒 2 分钟", "durationMinutes": 2 },
+        { "order": 5, "text": "加青椒丝、盐、少许醋，翻炒 1 分钟出锅", "durationMinutes": 1 }
+      ],
+      "tips": "土豆丝一定要泡水去淀粉，否则会粘锅发糊"
+    }
+  },
+  {
+    "name": "蛋炒饭",
+    "aliases": ["炒饭"],
+    "cuisine": 0,
+    "category": 1,
+    "spicyLevel": 0,
+    "priceMinCents": 1000,
+    "priceMaxCents": 1800,
+    "calories": 480,
+    "ingredients": [
+      { "name": "米饭", "amount": "2碗", "isCommonAllergen": false },
+      { "name": "鸡蛋", "amount": "2个", "isCommonAllergen": true },
+      { "name": "小葱", "amount": "2根", "isCommonAllergen": false }
+    ],
+    "tags": ["快手", "主食", "家常"],
+    "mealTimes": 15,
+    "seasons": 0,
+    "description": "粒粒分明，剩饭的最佳归宿",
+    "popularity": 91,
+    "recipe": {
+      "servings": 1,
+      "cookMinutes": 10,
+      "difficulty": 1,
+      "steps": [
+        { "order": 1, "text": "隔夜饭打散，鸡蛋打散加少许盐", "durationMinutes": 2 },
+        { "order": 2, "text": "热锅多油，倒入蛋液炒散盛出", "durationMinutes": 1 },
+        { "order": 3, "text": "下米饭中火炒散，压碎结块", "durationMinutes": 3 },
+        { "order": 4, "text": "倒回鸡蛋，加盐、葱花翻炒均匀", "durationMinutes": 2 }
+      ],
+      "tips": "用隔夜饭最干爽；没有的话新饭摊凉吹干也行"
+    }
+  },
+  {
+    "name": "红烧肉",
+    "aliases": ["东坡肉"],
+    "cuisine": 5,
+    "category": 2,
+    "spicyLevel": 0,
+    "priceMinCents": 3200,
+    "priceMaxCents": 4800,
+    "calories": 680,
+    "ingredients": [
+      { "name": "五花肉", "amount": "600g", "isCommonAllergen": false },
+      { "name": "冰糖", "amount": "30g", "isCommonAllergen": false },
+      { "name": "生抽", "amount": "3勺", "isCommonAllergen": true }
+    ],
+    "tags": ["重口", "宴客", "下饭", "炖菜"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "肥而不腻，入口即化，浓油赤酱的经典",
+    "popularity": 89
+  },
+  {
+    "name": "豆浆油条",
+    "aliases": [],
+    "cuisine": 0,
+    "category": 8,
+    "spicyLevel": 0,
+    "priceMinCents": 600,
+    "priceMaxCents": 1200,
+    "calories": 520,
+    "ingredients": [
+      { "name": "黄豆", "amount": "80g", "isCommonAllergen": true },
+      { "name": "面粉", "amount": "200g", "isCommonAllergen": true }
+    ],
+    "tags": ["早餐", "传统"],
+    "mealTimes": 1,
+    "seasons": 0,
+    "description": "中国人的经典早餐组合",
+    "popularity": 84
+  },
+  {
+    "name": "小笼包",
+    "aliases": ["灌汤包"],
+    "cuisine": 5,
+    "category": 8,
+    "spicyLevel": 0,
+    "priceMinCents": 1200,
+    "priceMaxCents": 2200,
+    "calories": 380,
+    "ingredients": [
+      { "name": "面粉", "amount": "250g", "isCommonAllergen": true },
+      { "name": "猪肉馅", "amount": "200g", "isCommonAllergen": false }
+    ],
+    "tags": ["早餐", "传统"],
+    "mealTimes": 1,
+    "seasons": 0,
+    "description": "皮薄馅大，一口爆汁",
+    "popularity": 86
+  },
+  {
+    "name": "皮蛋瘦肉粥",
+    "aliases": ["瘦肉粥"],
+    "cuisine": 2,
+    "category": 8,
+    "spicyLevel": 0,
+    "priceMinCents": 800,
+    "priceMaxCents": 1500,
+    "calories": 280,
+    "ingredients": [
+      { "name": "大米", "amount": "100g", "isCommonAllergen": false },
+      { "name": "皮蛋", "amount": "1个", "isCommonAllergen": true },
+      { "name": "瘦肉", "amount": "100g", "isCommonAllergen": false }
+    ],
+    "tags": ["早餐", "暖胃", "清淡"],
+    "mealTimes": 1,
+    "seasons": 0,
+    "description": "绵密顺滑，暖胃又顶饱",
+    "popularity": 83,
+    "recipe": {
+      "servings": 2,
+      "cookMinutes": 40,
+      "difficulty": 1,
+      "steps": [
+        { "order": 1, "text": "大米洗净，加少许油和盐拌匀腌 15 分钟", "durationMinutes": 15 },
+        { "order": 2, "text": "瘦肉切丝用生抽淀粉抓匀，皮蛋切丁", "durationMinutes": 5 },
+        { "order": 3, "text": "水开下米，大火煮沸转小火熬 25 分钟至米粒开花", "durationMinutes": 25 },
+        { "order": 4, "text": "下皮蛋和肉丝，再煮 5 分钟，加盐和白胡椒调味", "durationMinutes": 5 }
+      ],
+      "tips": "米先用油盐腌过，煮出来更绵更容易开花"
+    }
+  },
+  {
+    "name": "麻辣香锅",
+    "aliases": [],
+    "cuisine": 1,
+    "category": 9,
+    "spicyLevel": 4,
+    "priceMinCents": 4500,
+    "priceMaxCents": 7500,
+    "calories": 750,
+    "ingredients": [
+      { "name": "藕片", "amount": "150g", "isCommonAllergen": false },
+      { "name": "午餐肉", "amount": "100g", "isCommonAllergen": false },
+      { "name": "虾", "amount": "150g", "isCommonAllergen": true }
+    ],
+    "tags": ["重口", "聚餐", "下饭"],
+    "mealTimes": 14,
+    "seasons": 0,
+    "description": "想吃什么加什么，一锅端的热闹",
+    "popularity": 88
+  },
+  {
+    "name": "番茄鸡蛋面",
+    "aliases": ["西红柿鸡蛋面"],
+    "cuisine": 0,
+    "category": 1,
+    "spicyLevel": 0,
+    "priceMinCents": 1200,
+    "priceMaxCents": 2000,
+    "calories": 450,
+    "ingredients": [
+      { "name": "面条", "amount": "150g", "isCommonAllergen": true },
+      { "name": "番茄", "amount": "2个", "isCommonAllergen": false },
+      { "name": "鸡蛋", "amount": "2个", "isCommonAllergen": true }
+    ],
+    "tags": ["快手", "主食", "暖胃", "家常"],
+    "mealTimes": 15,
+    "seasons": 0,
+    "description": "汤浓面滑，一个人吃饭的最佳选择",
+    "popularity": 90,
+    "recipe": {
+      "servings": 1,
+      "cookMinutes": 15,
+      "difficulty": 1,
+      "steps": [
+        { "order": 1, "text": "番茄切块，鸡蛋打散", "durationMinutes": 2 },
+        { "order": 2, "text": "热锅冷油炒散鸡蛋盛出", "durationMinutes": 1 },
+        { "order": 3, "text": "下番茄炒出汁，加两碗水烧开", "durationMinutes": 4 },
+        { "order": 4, "text": "下面条煮至断生，倒回鸡蛋，加盐调味", "durationMinutes": 5 }
+      ],
+      "tips": "番茄多炒一会儿出沙，汤才够浓"
+    }
+  },
+  {
+    "name": "凉拌黄瓜",
+    "aliases": ["拍黄瓜"],
+    "cuisine": 0,
+    "category": 3,
+    "spicyLevel": 1,
+    "priceMinCents": 800,
+    "priceMaxCents": 1500,
+    "calories": 90,
+    "ingredients": [
+      { "name": "黄瓜", "amount": "2根", "isCommonAllergen": false },
+      { "name": "蒜", "amount": "3瓣", "isCommonAllergen": false },
+      { "name": "香醋", "amount": "2勺", "isCommonAllergen": false }
+    ],
+    "tags": ["清淡", "凉菜", "快手", "解腻"],
+    "mealTimes": 6,
+    "seasons": 2,
+    "description": "清脆爽口，夏天最解腻的一道小菜",
+    "popularity": 81,
+    "recipe": {
+      "servings": 2,
+      "cookMinutes": 8,
+      "difficulty": 1,
+      "steps": [
+        { "order": 1, "text": "黄瓜拍裂切段，加盐腌 5 分钟杀出水分", "durationMinutes": 5 },
+        { "order": 2, "text": "倒掉渗出的水，加蒜末、醋、生抽、香油、辣椒油拌匀", "durationMinutes": 2 }
+      ],
+      "tips": "拍比切更入味；腌出的水一定要倒掉，否则会稀"
+    }
+  },
+  {
+    "name": "酸辣汤",
+    "aliases": [],
+    "cuisine": 1,
+    "category": 4,
+    "spicyLevel": 2,
+    "priceMinCents": 1500,
+    "priceMaxCents": 2500,
+    "calories": 160,
+    "ingredients": [
+      { "name": "豆腐", "amount": "150g", "isCommonAllergen": true },
+      { "name": "木耳", "amount": "30g", "isCommonAllergen": false },
+      { "name": "鸡蛋", "amount": "1个", "isCommonAllergen": true },
+      { "name": "白胡椒粉", "amount": "1勺", "isCommonAllergen": false }
+    ],
+    "tags": ["暖胃", "开胃", "汤"],
+    "mealTimes": 6,
+    "seasons": 0,
+    "description": "酸辣开胃，饭前一碗最舒服",
+    "popularity": 77
+  },
+  {
+    "name": "银耳莲子羹",
+    "aliases": ["冰糖银耳"],
+    "cuisine": 0,
+    "category": 6,
+    "spicyLevel": 0,
+    "priceMinCents": 1000,
+    "priceMaxCents": 1800,
+    "calories": 150,
+    "ingredients": [
+      { "name": "银耳", "amount": "1朵", "isCommonAllergen": false },
+      { "name": "莲子", "amount": "30g", "isCommonAllergen": false },
+      { "name": "冰糖", "amount": "40g", "isCommonAllergen": false }
+    ],
+    "tags": ["甜点", "清淡", "润燥"],
+    "mealTimes": 15,
+    "seasons": 0,
+    "description": "胶质浓稠，清甜润燥",
+    "popularity": 72
+  }
+]

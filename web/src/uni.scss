@@ -1,0 +1,45 @@
+/* 美食伴侣 · 主题变量
+ * 暖橙色系，贴合「食物」的调性。
+ * 小程序不支持 CSS 变量穿透组件，故同时提供 SCSS 变量与 CSS 变量两种用法。 */
+
+/* ── SCSS 变量（供 <style lang="scss"> 直接使用）── */
+$fm-primary: #ff6b35;
+$fm-primary-light: #ff8c5f;
+$fm-primary-soft: #fff1ea;
+
+$fm-text: #1f2329;
+$fm-text-secondary: #5a6270;
+$fm-text-tertiary: #9aa0a6;
+$fm-text-inverse: #ffffff;
+
+$fm-bg-page: #f5f6f8;
+$fm-bg-card: #ffffff;
+$fm-bg-muted: #f0f1f4;
+
+$fm-border: #e8eaed;
+$fm-danger: #e5484d;
+$fm-success: #30a46c;
+$fm-warning: #f5a623;
+
+$fm-radius-sm: 8rpx;
+$fm-radius-md: 16rpx;
+$fm-radius-lg: 24rpx;
+
+$fm-gap-sm: 12rpx;
+$fm-gap-md: 24rpx;
+$fm-gap-lg: 32rpx;
+
+/* ── uni-app 内置变量覆盖 ── */
+$uni-color-primary: $fm-primary;
+$uni-color-success: $fm-success;
+$uni-color-warning: $fm-warning;
+$uni-color-error: $fm-danger;
+
+$uni-text-color: $fm-text;
+$uni-text-color-grey: $fm-text-tertiary;
+$uni-text-color-placeholder: $fm-text-tertiary;
+
+$uni-bg-color: $fm-bg-card;
+$uni-bg-color-grey: $fm-bg-page;
+
+$uni-border-color: $fm-border;
