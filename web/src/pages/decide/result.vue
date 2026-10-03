@@ -78,6 +78,11 @@ function toggleDetail(dishId: string) {
   expandedDishId.value = expandedDishId.value === dishId ? null : dishId
 }
 
+/** 打开菜品详情（含食材与做法）。 */
+function onOpenDish(dishId: string) {
+  uni.navigateTo({ url: `/pages/dish/detail?id=${dishId}` })
+}
+
 async function onEatThis(item: ScoredDish, source: 'wheel' | 'list' = 'list') {
   if (choosing.value) return
   choosing.value = true
@@ -238,8 +243,13 @@ onLoad(async () => {
       <text class="picked__reason">
         {{ store.wheelItems[highlighted].reasons.join(' · ') }}
       </text>
-      <view class="picked__button" @tap="onEatThis(store.wheelItems[highlighted], 'wheel')">
-        就吃这个
+      <view class="picked__actions">
+        <view class="picked__button picked__button--ghost" @tap="onOpenDish(store.wheelItems[highlighted].dishId)">
+          看做法
+        </view>
+        <view class="picked__button" @tap="onEatThis(store.wheelItems[highlighted], 'wheel')">
+          就吃这个
+        </view>
       </view>
     </view>
 
@@ -282,6 +292,7 @@ onLoad(async () => {
         <text class="link" @tap="toggleDetail(item.dishId)">
           {{ expandedDishId === item.dishId ? '收起' : '为什么推荐' }}
         </text>
+        <text class="link" @tap="onOpenDish(item.dishId)">看做法</text>
         <text class="link link--primary" @tap="onEatThis(item)">就吃这个</text>
       </view>
 
@@ -395,13 +406,24 @@ onLoad(async () => {
   }
 
   &__button {
-    margin-top: $fm-gap-lg;
-    padding: 20rpx 64rpx;
+    padding: 20rpx 48rpx;
     border-radius: 999rpx;
     background: $fm-primary;
     color: #fff;
-    font-size: 30rpx;
+    font-size: 29rpx;
     font-weight: 600;
+
+    &--ghost {
+      background: transparent;
+      color: $fm-primary;
+      border: 2rpx solid $fm-primary;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $fm-gap-md;
+    margin-top: $fm-gap-lg;
   }
 }
 

@@ -15,7 +15,14 @@ export { metaApi, healthApi } from './modules/meta'
 export type { EnumDictionary, EnumOption, ServiceMeta, HealthInfo, ReadyInfo } from './modules/meta'
 
 export { dishApi } from './modules/dish'
-export type { DishBrief, DishQuery } from './modules/dish'
+export type {
+  DishBrief,
+  DishDetail,
+  DishIngredient,
+  DishRecipe,
+  DishRecipeStep,
+  DishQuery,
+} from './modules/dish'
 
 export { decisionApi, engineApi } from './modules/decision'
 export type {

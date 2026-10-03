@@ -14,7 +14,15 @@ const saving = ref(false)
 const loading = ref(false)
 
 /* ── 表单状态 ── */
-const selectedDish = ref<DishBrief | null>(null)
+
+/**
+ * 记录编辑页只需要菜品的一小部分字段。
+ * 用 Pick 而不是整个 DishBrief —— 这样从菜品详情页（DishDetail）跳过来时
+ * 也能直接赋值，不必做不安全的类型断言。
+ */
+type DishRef = Pick<DishBrief, 'id' | 'name' | 'cuisineLabel' | 'spicyLabel' | 'calories'>
+
+const selectedDish = ref<DishRef | null>(null)
 const dishName = ref('')
 const mealType = ref(2)
 const diningMode = ref(2)
@@ -191,6 +199,23 @@ async function onDelete() {
 
 onLoad(async (options) => {
   void meta.loadEnums()
+
+  // 从菜品详情页「记一顿」跳过来时，直接带上菜品
+  const presetDishId = options?.dishId as string | undefined
+  const presetDishName = options?.dishName as string | undefined
+
+  if (presetDishName) {
+    dishName.value = decodeURIComponent(presetDishName)
+  }
+
+  if (presetDishId) {
+    try {
+      selectedDish.value = await dishApi.detail(presetDishId)
+      dishName.value = selectedDish.value.name
+    } catch {
+      // 拿不到详情就用传过来的菜名
+    }
+  }
 
   const id = options?.id as string | undefined
   if (!id) return
