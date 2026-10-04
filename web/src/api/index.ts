@@ -31,6 +31,7 @@ export type {
   ScoredDish,
   Penalty,
   EngineMeta,
+  ChoiceSource,
 } from './modules/decision'
 
 export { recordApi } from './modules/record'

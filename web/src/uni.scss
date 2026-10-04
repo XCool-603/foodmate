@@ -57,10 +57,11 @@ $fm-danger: $cy-red;
 $fm-success: $cy-lime;
 $fm-warning: $cy-amber;
 
-/* 直角化：赛博朋克不用圆角 */
-$fm-radius-sm: 0;
-$fm-radius-md: 0;
-$fm-radius-lg: 0;
+/* 圆角尺度：霓虹灯管本来就是圆的，圆角 + 霓虹是成立的组合 */
+$fm-radius-sm: 10rpx;
+$fm-radius-md: 18rpx;
+$fm-radius-lg: 26rpx;
+$fm-radius-pill: 999rpx;
 
 $fm-gap-sm: 12rpx;
 $fm-gap-md: 24rpx;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
-import DishWheel from '@/components/DishWheel.vue'
+import GachaCard from '@/components/GachaCard.vue'
 import { engineApi } from '@/api'
 import type { EngineMeta, ScoredDish } from '@/api'
 import { useDecisionStore, useRecordStore } from '@/stores'
@@ -10,86 +10,102 @@ import { formatPriceRange } from '@/utils/format'
 const store = useDecisionStore()
 const records = useRecordStore()
 
-const wheelRef = ref<InstanceType<typeof DishWheel> | null>(null)
 const engine = ref<EngineMeta | null>(null)
-const spinning = ref(false)
-const highlighted = ref<number>(-1)
+
+/** 当前抽中的卡 */
+const drawn = ref<ScoredDish | null>(null)
+/** 悬念中（牌堆抖动） */
+const drawing = ref(false)
+/** 卡面已翻开 */
+const revealed = ref(false)
+/** 已抽过的菜，避免重复 */
+const drawnIds = ref<Set<string>>(new Set())
+
+const highlighted = ref<string | null>(null)
 const expandedDishId = ref<string | null>(null)
 const choosing = ref(false)
 
-const wheelItems = computed(() =>
-  store.wheelItems.map((item) => ({ id: item.dishId, name: item.name })),
-)
+/** 可抽的候选：优先给没抽过的 */
+const drawPool = computed(() => {
+  const all = store.wheelItems
+  const fresh = all.filter((i) => !drawnIds.value.has(i.dishId))
+  return fresh.length > 0 ? fresh : all
+})
 
 const summary = computed(() => {
   const data = store.result
   if (!data) return ''
-  return `候选 ${data.candidateCount} 道 · 过滤 ${data.filteredOutCount} 道 · 耗时 ${data.elapsedMs}ms`
+  return `候选 ${data.candidateCount} · 过滤 ${data.filteredOutCount} · ${data.elapsedMs}ms`
 })
 
-const relaxedHint = computed(() => {
-  const level = store.result?.relaxedLevel ?? 0
-  if (level === 0) return ''
-  return '符合条件的菜不多，已为你放宽了部分条件'
+const relaxedHint = computed(() =>
+  (store.result?.relaxedLevel ?? 0) > 0 ? '符合条件的菜不多，已放宽部分条件' : '',
+)
+
+const drawLabel = computed(() => {
+  if (drawing.value) return '抽取中…'
+  if (!drawn.value) return '抽一张'
+  return drawnIds.value.size >= store.wheelItems.length ? '重新抽' : '再抽一次'
 })
 
-/** 某个维度的加权贡献（0–1），用于画条形图。 */
-function contribution(item: ScoredDish, dimension: string): number {
-  const weight = engine.value?.weights[dimension] ?? 0
-  return weight * (item.breakdown[dimension] ?? 0)
+/** 抽卡 */
+function onDraw() {
+  if (drawing.value || store.wheelItems.length === 0) return
+
+  drawing.value = true
+  revealed.value = false
+  drawn.value = null
+  highlighted.value = null
+
+  // 悬念：牌堆抖动一下再出牌，比瞬间出结果更有"抽"的感觉
+  setTimeout(() => {
+    const pool = drawPool.value
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+
+    drawn.value = pick
+    drawnIds.value = new Set([...drawnIds.value, pick.dishId])
+    highlighted.value = pick.dishId
+    drawing.value = false
+
+    // 先让卡面出现（缩在牌堆里），下一帧再翻开，触发过渡动画
+    setTimeout(() => {
+      revealed.value = true
+    }, 50)
+
+    // 回传选择，这是权重调优的核心数据
+    void store.choose(pick.dishId, 'card')
+
+    try {
+      uni.vibrateShort({ type: 'medium' })
+    } catch {
+      // 不支持时忽略
+    }
+  }, 420)
 }
 
-function dimensionLabel(dimension: string): string {
-  return engine.value?.dimensionLabels[dimension] ?? dimension
-}
-
-/** 按贡献降序的维度列表。 */
-function dimensions(item: ScoredDish): string[] {
-  return Object.keys(item.breakdown).sort(
-    (a, b) => contribution(item, b) - contribution(item, a),
-  )
-}
-
-function onSpin() {
-  if (spinning.value || wheelItems.value.length === 0) return
-  highlighted.value = -1
-  spinning.value = true
-  wheelRef.value?.spinRandom()
-}
-
-function onSpinDone(index: number) {
-  spinning.value = false
-  highlighted.value = index
-
-  const picked = store.wheelItems[index]
-  if (picked) {
-    store.choose(picked.dishId, 'wheel')
-  }
-
-  // 轻震动反馈，强化「停下了」的感觉
-  try {
-    uni.vibrateShort({ type: 'light' })
-  } catch {
-    // 不支持时忽略
-  }
+/** 抽完了，重置已抽记录 */
+function onResetDeck() {
+  drawnIds.value = new Set()
+  drawn.value = null
+  revealed.value = false
+  highlighted.value = null
+  uni.showToast({ title: '牌堆已重置', icon: 'none' })
 }
 
 function toggleDetail(dishId: string) {
   expandedDishId.value = expandedDishId.value === dishId ? null : dishId
 }
 
-/** 打开菜品详情（含食材与做法）。 */
 function onOpenDish(dishId: string) {
   uni.navigateTo({ url: `/pages/dish/detail?id=${dishId}` })
 }
 
-async function onEatThis(item: ScoredDish, source: 'wheel' | 'list' = 'list') {
+async function onEatThis(item: ScoredDish) {
   if (choosing.value) return
   choosing.value = true
 
   try {
-    // 回传选择是权重调优的核心数据，即使用户没记录也要发
-    await store.choose(item.dishId, source)
+    await store.choose(item.dishId, 'list')
 
     const sessionId = store.result?.sessionId
     const eatenAt = new Date().toISOString()
@@ -160,7 +176,6 @@ async function afterRecorded(dishName: string) {
   }, 700)
 }
 
-/** 当前餐次（与服务端的推断规则保持一致）。 */
 function currentMealType(): number {
   const hour = new Date().getHours()
   if (hour >= 5 && hour < 10) return 1
@@ -169,7 +184,6 @@ function currentMealType(): number {
   return 4
 }
 
-/** 本次决策使用的就餐方式；「随便」时按堂食记录。 */
 function currentDiningMode(): number {
   const mode = store.lastRequest?.diningMode ?? 0
   return mode === 0 ? 2 : mode
@@ -178,8 +192,11 @@ function currentDiningMode(): number {
 async function onRefresh() {
   if (store.loading) return
 
-  highlighted.value = -1
+  highlighted.value = null
   expandedDishId.value = null
+  drawn.value = null
+  revealed.value = false
+  drawnIds.value = new Set()
 
   try {
     await store.refresh()
@@ -189,14 +206,19 @@ async function onRefresh() {
   }
 }
 
-function onShare() {
-  const top = store.result?.ranked[0]
-  if (!top) return
+function contribution(item: ScoredDish, dimension: string): number {
+  const weight = engine.value?.weights[dimension] ?? 0
+  return weight * (item.breakdown[dimension] ?? 0)
+}
 
-  uni.setClipboardData({
-    data: `今天吃「${top.name}」！${top.reasons.join('，')} —— 来自美食伴侣`,
-    success: () => uni.showToast({ title: '推荐语已复制', icon: 'none' }),
-  })
+function dimensionLabel(dimension: string): string {
+  return engine.value?.dimensionLabels[dimension] ?? dimension
+}
+
+function dimensions(item: ScoredDish): string[] {
+  return Object.keys(item.breakdown).sort(
+    (a, b) => contribution(item, b) - contribution(item, a),
+  )
 }
 
 onLoad(async () => {
@@ -216,47 +238,75 @@ onLoad(async () => {
 
 <template>
   <view class="page">
-    <!-- 转盘 -->
-    <view class="wheel-box">
-      <DishWheel
-        ref="wheelRef"
-        :items="wheelItems"
-        @done="onSpinDone"
-      />
-
-      <view
-        class="spin-button"
-        :class="{ 'spin-button--disabled': spinning || wheelItems.length === 0 }"
-        @tap="onSpin"
-      >
-        {{ spinning ? '转着呢…' : '开始转 🎯' }}
+    <!-- ── 抽卡区 ─────────────────────────────────────── -->
+    <view class="gacha">
+      <view class="gacha__head">
+        <text class="gacha__title">✦ 今日抽卡</text>
+        <text class="gacha__sub">
+          从 {{ store.wheelItems.length }} 张候选里抽一张
+        </text>
       </view>
 
-      <text class="summary">{{ summary }}</text>
-      <text v-if="relaxedHint" class="relaxed">{{ relaxedHint }}</text>
-    </view>
+      <GachaCard
+        :item="drawn"
+        :revealed="revealed"
+        :drawing="drawing"
+        @tap="drawn ? null : onDraw()"
+      />
 
-    <!-- 转盘抽中的结果 -->
-    <view v-if="highlighted >= 0 && store.wheelItems[highlighted]" class="picked">
-      <text class="picked__label">转盘选中</text>
-      <text class="picked__name">{{ store.wheelItems[highlighted].name }}</text>
-      <text class="picked__reason">
-        {{ store.wheelItems[highlighted].reasons.join(' · ') }}
-      </text>
-      <view class="picked__actions">
-        <view class="picked__button picked__button--ghost" @tap="onOpenDish(store.wheelItems[highlighted].dishId)">
-          看做法
+      <!-- 稀有度图例 -->
+      <view class="legend">
+        <view class="legend__item legend__item--ssr">
+          <text class="legend__key">SSR</text>
+          <text class="legend__desc">第 1 名</text>
         </view>
-        <view class="picked__button" @tap="onEatThis(store.wheelItems[highlighted], 'wheel')">
+        <view class="legend__item legend__item--sr">
+          <text class="legend__key">SR</text>
+          <text class="legend__desc">前 3 名</text>
+        </view>
+        <view class="legend__item legend__item--r">
+          <text class="legend__key">R</text>
+          <text class="legend__desc">前 8 名</text>
+        </view>
+        <view class="legend__item legend__item--n">
+          <text class="legend__key">N</text>
+          <text class="legend__desc">其他</text>
+        </view>
+      </view>
+
+      <!-- 操作 -->
+      <view class="gacha__actions">
+        <view
+          class="fm-button gacha__draw"
+          :class="{ 'fm-button--disabled': drawing }"
+          @tap="onDraw"
+        >
+          {{ drawLabel }}
+        </view>
+        <view
+          v-if="drawn"
+          class="fm-button fm-button--ghost gacha__eat"
+          :class="{ 'fm-button--disabled': choosing }"
+          @tap="onEatThis(drawn)"
+        >
           就吃这个
         </view>
       </view>
+
+      <view v-if="drawn" class="gacha__extra">
+        <text class="link" @tap="onOpenDish(drawn.dishId)">看做法</text>
+        <text class="gacha__dot">·</text>
+        <text class="link" @tap="onResetDeck">重置牌堆</text>
+      </view>
+
+      <text class="gacha__summary">{{ summary }}</text>
+      <text v-if="relaxedHint" class="gacha__relaxed">{{ relaxedHint }}</text>
     </view>
 
-    <!-- 推荐榜单 -->
+    <!-- ── 完整榜单 ───────────────────────────────────── -->
     <view class="section-head">
       <text class="section-title">
-        <text class="section-title__mark">▸</text>为什么是这些
+        <text class="section-title__mark">▸</text>完整榜单
       </text>
       <text class="section-hint">RANKED BY SCORE</text>
     </view>
@@ -265,7 +315,7 @@ onLoad(async () => {
       v-for="item in store.result?.ranked ?? []"
       :key="item.dishId"
       class="dish"
-      :class="{ 'dish--highlight': highlighted >= 0 && store.wheelItems[highlighted]?.dishId === item.dishId }"
+      :class="{ 'dish--highlight': highlighted === item.dishId }"
     >
       <view class="dish__head">
         <view class="dish__rank">{{ item.rank }}</view>
@@ -303,11 +353,7 @@ onLoad(async () => {
 
       <!-- 打分明细 -->
       <view v-if="expandedDishId === item.dishId" class="breakdown">
-        <view
-          v-for="dim in dimensions(item)"
-          :key="dim"
-          class="bar-row"
-        >
+        <view v-for="dim in dimensions(item)" :key="dim" class="bar-row">
           <text class="bar-row__label">{{ dimensionLabel(dim) }}</text>
           <view class="bar-row__track">
             <view
@@ -331,12 +377,10 @@ onLoad(async () => {
     <!-- 底部操作 -->
     <view class="actions">
       <view class="fm-button fm-button--ghost" @tap="onRefresh">换一批</view>
-      <view class="fm-button fm-button--ghost" @tap="onShare">复制推荐语</view>
     </view>
 
     <view class="footer">
-      引擎 v{{ store.result?.engineVersion ?? '—' }} · 抖动
-      {{ store.jitterUsed > 0 ? `σ=${store.jitterUsed}` : '关闭（结果可复现）' }}
+      引擎 v{{ store.result?.engineVersion ?? '—' }} · 稀有度按推荐排名划分
     </view>
   </view>
 </template>
@@ -347,121 +391,126 @@ onLoad(async () => {
   padding-bottom: 60rpx;
 }
 
-/* ── 转盘 ── */
-.wheel-box {
+/* ── 抽卡区 ───────────────────────────────────────────────── */
+.gacha {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: $fm-gap-lg 0 $fm-gap-md;
-}
 
-.spin-button {
-  margin-top: $fm-gap-lg;
-  padding: 24rpx 80rpx;
-  background: linear-gradient(100deg, rgba(255, 46, 151, 0.2), rgba(0, 240, 255, 0.2));
-  border: 1px solid $cy-magenta;
-  color: #fff;
-  font-size: 30rpx;
-  font-weight: 700;
-  letter-spacing: 4rpx;
-  text-shadow: 0 0 14rpx rgba(255, 46, 151, 0.8);
-  box-shadow:
-    0 0 18rpx rgba(255, 46, 151, 0.45),
-    inset 0 0 24rpx rgba(255, 46, 151, 0.12);
-
-  &--disabled {
-    background: $cy-surface-2;
-    border-color: $cy-line;
-    color: $cy-text-faint;
-    text-shadow: none;
-    box-shadow: none;
-  }
-}
-
-.summary {
-  margin-top: $fm-gap-md;
-  font-family: $cy-mono;
-  font-size: 21rpx;
-  letter-spacing: 1rpx;
-  color: $cy-text-faint;
-}
-
-.relaxed {
-  margin-top: 8rpx;
-  font-family: $cy-mono;
-  font-size: 21rpx;
-  color: $cy-amber;
-}
-
-/* ── 转盘结果卡 ── */
-.picked {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  padding: $fm-gap-lg;
-  margin-bottom: $fm-gap-lg;
-  background:
-    linear-gradient(160deg, rgba(255, 46, 151, 0.14), rgba(0, 240, 255, 0.06) 60%),
-    $cy-surface;
-  border: 1px solid $cy-magenta;
-  box-shadow:
-    0 0 20rpx rgba(255, 46, 151, 0.3),
-    inset 0 0 40rpx rgba(255, 46, 151, 0.06);
-
-  &__label {
-    @include hud-label($cy-magenta);
+  &__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8rpx;
+    margin-bottom: $fm-gap-md;
   }
 
-  &__name {
-    margin-top: 10rpx;
-    font-size: 50rpx;
+  &__title {
+    font-size: 34rpx;
     font-weight: 800;
-    letter-spacing: 2rpx;
-    color: $cy-text;
-    text-shadow:
-      0 0 20rpx rgba(255, 46, 151, 0.5),
-      2rpx 0 0 rgba(0, 240, 255, 0.4);
+    letter-spacing: 6rpx;
+    @include neon-text($cy-cyan);
   }
 
-  &__reason {
-    margin-top: 12rpx;
-    font-size: 25rpx;
-    color: $cy-text-dim;
-    text-align: center;
-    line-height: 1.6;
-  }
-
-  &__button {
-    padding: 20rpx 48rpx;
-    background: rgba(0, 240, 255, 0.14);
-    border: 1px solid $cy-cyan;
-    color: $cy-cyan;
-    font-size: 29rpx;
-    font-weight: 700;
-    letter-spacing: 2rpx;
-    box-shadow: 0 0 14rpx rgba(0, 240, 255, 0.3);
-
-    &--ghost {
-      background: transparent;
-      color: $fm-primary;
-      border: 2rpx solid $fm-primary;
-    }
+  &__sub {
+    @include hud-label();
   }
 
   &__actions {
     display: flex;
     gap: $fm-gap-md;
+    width: 100%;
     margin-top: $fm-gap-lg;
+  }
+
+  &__draw {
+    flex: 1;
+  }
+
+  &__eat {
+    flex: 1;
+  }
+
+  &__extra {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    margin-top: $fm-gap-md;
+  }
+
+  &__dot {
+    color: $cy-text-faint;
+  }
+
+  &__summary {
+    margin-top: $fm-gap-md;
+    @include hud-label();
+  }
+
+  &__relaxed {
+    margin-top: 8rpx;
+    font-family: $cy-mono;
+    font-size: 21rpx;
+    color: $cy-amber;
   }
 }
 
-/* ── 小节标题 ── */
+/* ── 稀有度图例 ───────────────────────────────────────────── */
+.legend {
+  display: flex;
+  gap: $fm-gap-lg;
+  margin-top: $fm-gap-lg;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rpx;
+    opacity: 0.85;
+  }
+
+  &__key {
+    font-family: $cy-mono;
+    font-size: 24rpx;
+    font-weight: 800;
+    letter-spacing: 2rpx;
+  }
+
+  &__desc {
+    font-family: $cy-mono;
+    font-size: 18rpx;
+    color: $cy-text-faint;
+  }
+
+  &__item--ssr &__key {
+    background: linear-gradient(100deg, #00f0ff, #ff2e97, #ffc53d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__item--sr &__key {
+    color: $cy-magenta;
+    text-shadow: 0 0 10rpx rgba(255, 46, 151, 0.6);
+  }
+
+  &__item--r &__key {
+    color: $cy-cyan;
+    text-shadow: 0 0 10rpx rgba(0, 240, 255, 0.6);
+  }
+
+  &__item--n &__key {
+    color: $cy-text-faint;
+  }
+}
+
+/* ── 榜单 ─────────────────────────────────────────────────── */
 .section-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin: 0 8rpx $fm-gap-md;
+  margin: $fm-gap-lg 8rpx $fm-gap-md;
 }
 
 .section-title {
@@ -483,16 +532,18 @@ onLoad(async () => {
   color: $cy-text-faint;
 }
 
-/* ── 推荐项 ── */
 .dish {
-  background: $fm-bg-card;
+  position: relative;
+  background: $cy-surface;
+  border: 1px solid $cy-line;
   border-radius: $fm-radius-md;
   padding: $fm-gap-md $fm-gap-lg;
   margin-bottom: $fm-gap-sm;
-  border: 2rpx solid transparent;
+  transition: all 0.2s ease;
 
   &--highlight {
-    border-color: $fm-primary;
+    border-color: $cy-cyan;
+    box-shadow: 0 0 18rpx rgba(0, 240, 255, 0.35);
   }
 
   &__head {
@@ -504,6 +555,7 @@ onLoad(async () => {
   &__rank {
     width: 46rpx;
     height: 46rpx;
+    border-radius: $fm-radius-sm;
     background: $cy-surface-2;
     border: 1px solid rgba(0, 240, 255, 0.35);
     color: $cy-cyan;
@@ -585,28 +637,31 @@ onLoad(async () => {
 }
 
 .penalty {
-  font-size: 21rpx;
-  color: $fm-danger;
-  background: rgba(229, 72, 77, 0.08);
+  font-family: $cy-mono;
+  font-size: 20rpx;
+  color: $cy-red;
+  border: 1px solid rgba(255, 59, 92, 0.35);
   border-radius: $fm-radius-sm;
-  padding: 4rpx 12rpx;
+  padding: 2rpx 12rpx;
 }
 
 .link {
-  font-size: 25rpx;
-  color: $fm-text-tertiary;
+  font-family: $cy-mono;
+  font-size: 23rpx;
+  color: $cy-text-faint;
 
   &--primary {
-    color: $fm-primary;
-    font-weight: 600;
+    color: $cy-cyan;
+    font-weight: 700;
+    text-shadow: 0 0 10rpx rgba(0, 240, 255, 0.5);
   }
 }
 
-/* ── 打分明细 ── */
+/* ── 打分明细 ─────────────────────────────────────────────── */
 .breakdown {
   margin-top: $fm-gap-md;
   padding-top: $fm-gap-md;
-  border-top: 2rpx solid $fm-border;
+  border-top: 1px solid $cy-line;
 }
 
 .bar-row {
@@ -626,6 +681,7 @@ onLoad(async () => {
   &__track {
     flex: 1;
     height: 12rpx;
+    border-radius: $fm-radius-pill;
     background: $cy-surface-2;
     border: 1px solid $cy-line;
     overflow: hidden;
@@ -633,6 +689,7 @@ onLoad(async () => {
 
   &__fill {
     height: 100%;
+    border-radius: $fm-radius-pill;
     background: linear-gradient(90deg, $cy-cyan, $cy-magenta);
     box-shadow: 0 0 12rpx rgba(0, 240, 255, 0.7);
   }
@@ -656,22 +713,23 @@ onLoad(async () => {
   color: $cy-text-faint;
 }
 
-/* ── 其它 ── */
+/* ── 其它 ─────────────────────────────────────────────────── */
 .empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding: 80rpx 0;
+  text-align: center;
 
   &__title {
+    display: block;
     font-size: 30rpx;
     font-weight: 600;
   }
 
   &__desc {
+    display: block;
     margin-top: 8rpx;
-    font-size: 24rpx;
-    color: $fm-text-tertiary;
+    font-family: $cy-mono;
+    font-size: 22rpx;
+    color: $cy-text-faint;
   }
 }
 
@@ -690,7 +748,7 @@ onLoad(async () => {
 .footer {
   margin-top: $fm-gap-lg;
   text-align: center;
-  font-size: 21rpx;
-  color: $fm-text-tertiary;
+  @include hud-label($cy-text-faint);
+  opacity: 0.7;
 }
 </style>

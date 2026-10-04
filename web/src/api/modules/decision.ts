@@ -53,6 +53,9 @@ export interface EngineMeta {
   dimensionLabels: Record<string, string>
 }
 
+/** 用户选择的来源，用于分析「哪种交互更容易被采纳」。 */
+export type ChoiceSource = 'card' | 'wheel' | 'list' | 'other'
+
 export const decisionApi = {
   /** 获取推荐。 */
   suggest: (body: DecisionSuggestRequest) =>
@@ -63,7 +66,7 @@ export const decisionApi = {
     }),
 
   /** 回传用户最终选择（权重调优的核心数据）。 */
-  choose: (sessionId: string, dishId: string, source: 'wheel' | 'list' | 'other' = 'list') =>
+  choose: (sessionId: string, dishId: string, source: ChoiceSource = 'list') =>
     request<{ sessionId: string; dishId: string; rank: number; chosenAt: string }>({
       url: `/api/v1/decisions/${sessionId}/choose`,
       method: 'POST',

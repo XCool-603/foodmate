@@ -47,21 +47,24 @@ page {
   position: relative;
   padding: $fm-gap-lg;
   margin-bottom: $fm-gap-md;
+  border-radius: $fm-radius-lg;
   background:
     linear-gradient(150deg, rgba(0, 240, 255, 0.055) 0%, transparent 45%),
     $cy-surface;
   border: 1px solid $cy-line;
+  overflow: hidden;
 
-  /* 右上角 L 形角标 —— 比圆角更"仪器" */
+  /* 右上角 L 形角标 —— 圆角面板上保留一点"仪器"感 */
   &::after {
     content: '';
     position: absolute;
-    top: -1px;
-    right: -1px;
+    top: 10rpx;
+    right: 10rpx;
     width: 20rpx;
     height: 20rpx;
-    border-top: 2px solid rgba(0, 240, 255, 0.6);
-    border-right: 2px solid rgba(0, 240, 255, 0.6);
+    border-top: 2px solid rgba(0, 240, 255, 0.55);
+    border-right: 2px solid rgba(0, 240, 255, 0.55);
+    border-top-right-radius: 8rpx;
     pointer-events: none;
   }
 }
@@ -76,6 +79,7 @@ page {
 .fm-chip {
   position: relative;
   padding: 12rpx 26rpx;
+  border-radius: $fm-radius-pill;
   background: $cy-surface-2;
   border: 1px solid $cy-line;
   color: $cy-text-dim;
@@ -85,13 +89,13 @@ page {
   transition: all 0.16s ease;
 
   &--active {
-    background: rgba(0, 240, 255, 0.1);
+    background: rgba(0, 240, 255, 0.12);
     border-color: $cy-cyan;
     color: $cy-cyan;
     font-weight: 600;
     box-shadow:
-      0 0 10rpx rgba(0, 240, 255, 0.45),
-      inset 0 0 14rpx rgba(0, 240, 255, 0.12);
+      0 0 12rpx rgba(0, 240, 255, 0.45),
+      inset 0 0 16rpx rgba(0, 240, 255, 0.14);
   }
 }
 
@@ -102,6 +106,7 @@ page {
   align-items: center;
   justify-content: center;
   height: 96rpx;
+  border-radius: $fm-radius-md;
   background: linear-gradient(100deg, rgba(0, 240, 255, 0.16), rgba(255, 46, 151, 0.12));
   border: 1px solid $cy-cyan;
   color: $cy-cyan;
@@ -110,8 +115,8 @@ page {
   letter-spacing: 3rpx;
   text-shadow: 0 0 12rpx rgba(0, 240, 255, 0.6);
   box-shadow:
-    0 0 14rpx rgba(0, 240, 255, 0.35),
-    inset 0 0 22rpx rgba(0, 240, 255, 0.1);
+    0 0 16rpx rgba(0, 240, 255, 0.35),
+    inset 0 0 24rpx rgba(0, 240, 255, 0.1);
   overflow: hidden;
 
   /* 按钮内的斜向扫光 */

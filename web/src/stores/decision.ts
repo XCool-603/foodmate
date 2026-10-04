@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { decisionApi } from '@/api'
-import type { DecisionSuggestRequest, DecisionSuggestResponse, ScoredDish } from '@/api'
+import type { ChoiceSource, DecisionSuggestRequest, DecisionSuggestResponse, ScoredDish } from '@/api'
+
+/** 用户选择的来源。 */
+export type { ChoiceSource }
 
 /**
  * 决策状态。
@@ -73,7 +76,7 @@ export const useDecisionStore = defineStore('decision', () => {
   }
 
   /** 回传用户选择。失败不阻塞主流程。 */
-  async function choose(dishId: string, source: 'wheel' | 'list' | 'other') {
+  async function choose(dishId: string, source: ChoiceSource) {
     const sessionId = result.value?.sessionId
     if (!sessionId) return
 
