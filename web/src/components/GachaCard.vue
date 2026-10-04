@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ScoredDish } from '@/api'
+import DishArt from './DishArt.vue'
 
 /**
  * 抽卡卡片。
@@ -91,6 +92,17 @@ function onTap() {
         </view>
         <text class="card__rank">#{{ String(item.rank).padStart(2, '0') }}</text>
       </view>
+
+      <!-- 卡面视觉 -->
+      <DishArt
+        class="card__art"
+        variant="card"
+        :name="item.name"
+        :cuisine="item.dish.cuisine"
+        :category="item.dish.category"
+        :spicy-level="item.dish.spicyLevel"
+        :image-url="item.dish.imageUrl"
+      />
 
       <!-- 菜名 -->
       <view class="card__body">
@@ -301,6 +313,10 @@ function onTap() {
     color: $cy-text-faint;
   }
 
+  &__art {
+    margin-top: $fm-gap-md;
+  }
+
   /* ── 主体 ──────────────────────────────────────── */
   &__body {
     flex: 1;
@@ -308,7 +324,7 @@ function onTap() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: $fm-gap-lg 0;
+    padding: $fm-gap-md 0;
   }
 
   &__name {

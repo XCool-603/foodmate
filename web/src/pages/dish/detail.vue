@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { aiApi, dishApi } from '@/api'
 import type { DishDetail, DishRecipe } from '@/api'
+import DishArt from '@/components/DishArt.vue'
 import { useRecordStore } from '@/stores'
 import { formatPriceRange } from '@/utils/format'
 
@@ -135,6 +136,17 @@ onLoad((options) => {
     </view>
 
     <template v-else>
+      <!-- 菜品视觉 -->
+      <DishArt
+        class="detail-art"
+        variant="banner"
+        :name="dish.name"
+        :cuisine="dish.cuisine"
+        :category="dish.category"
+        :spicy-level="dish.spicyLevel"
+        :image-url="dish.imageUrl"
+      />
+
       <!-- 头部 -->
       <view class="hero">
         <text class="hero__name">{{ dish.name }}</text>
@@ -255,9 +267,14 @@ onLoad((options) => {
   padding-bottom: 60rpx;
 }
 
+/* ── 菜品视觉 ─────────────────────────────────────────────── */
+.detail-art {
+  margin-bottom: $fm-gap-lg;
+}
+
 /* ── 头部 ── */
 .hero {
-  padding: $fm-gap-md 8rpx $fm-gap-lg;
+  padding: 0 8rpx $fm-gap-lg;
 
   &__name {
     display: block;

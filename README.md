@@ -162,6 +162,40 @@ npm run dev:mp-toutiao
 dotnet test
 ```
 
+### 菜品图片怎么来的
+
+**当前所有菜品都没有真实照片**，前端渲染的是**程序化生成的「霓虹卡面」**：
+按菜系取色（川菜品红 / 粤菜青绿 / 日料靛紫…）、按分类给图标（主食 🍚 / 荤菜 🍖 / 汤羹 🍲…）、
+按辣度调光晕。
+
+为什么这么做：
+
+- 20 道菜需要 20 张图，图库有版权问题，也没法凭空生成照片
+- 赛博朋克风格里，**风格化图形本来就比照片更贴主题**（赛博朋克 2077 的物品卡也是图形）
+- 程序化生成零素材、离线可用，且配色与菜系语义相关
+
+**想换成真实照片**：
+
+```bash
+# 1. 把图片放进这里（文件名随意，建议用拼音）
+src/FoodMate.Api/wwwroot/images/dishes/tomato-beef.jpg
+
+# 2. 在种子数据里填地址
+#    src/FoodMate.Infrastructure/Data/Seed/dishes.seed.json
+{
+  "name": "番茄牛腩",
+  "imageUrl": "/images/dishes/tomato-beef.jpg",
+  ...
+}
+
+# 3. 重启后端（开发库会重建并重新导入种子）
+dotnet run --project src/FoodMate.Api
+```
+
+有 `imageUrl` 就显示图片，没有就回落到程序化卡面——**不会出现空占位**。
+
+用户自己拍的照片（饮食记录里的 `photoUrl`）优先级最高，记录列表会优先显示它。
+
 ---
 
 ## 目录结构

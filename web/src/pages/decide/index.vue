@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { dishApi } from '@/api'
 import type { DishBrief } from '@/api'
+import DishArt from '@/components/DishArt.vue'
 import { useDecisionStore, useMetaStore } from '@/stores'
 import { formatPriceRange, greeting, mealPrompt } from '@/utils/format'
 
@@ -295,18 +296,28 @@ onShow(() => {
         class="dish"
         @tap="onDishTap(dish)"
       >
-        <view class="dish__head">
-          <text class="dish__name">{{ dish.name }}</text>
-          <text class="dish__price">{{ formatPriceRange(dish.priceMinCents, dish.priceMaxCents) }}</text>
-        </view>
-        <view class="dish__meta">
-          <text class="dish__tag">{{ dish.cuisineLabel }}</text>
-          <text class="dish__tag">{{ dish.categoryLabel }}</text>
-          <text class="dish__tag">{{ dish.spicyLabel }}</text>
-          <text v-if="dish.calories" class="dish__tag">{{ dish.calories }} kcal</text>
-          <text v-if="dish.hasRecipe" class="dish__tag dish__tag--recipe">
-            可自制 {{ dish.cookMinutes }}min
-          </text>
+        <DishArt
+          variant="thumb"
+          :name="dish.name"
+          :cuisine="dish.cuisine"
+          :category="dish.category"
+          :spicy-level="dish.spicyLevel"
+          :image-url="dish.imageUrl"
+        />
+        <view class="dish__body">
+          <view class="dish__head">
+            <text class="dish__name">{{ dish.name }}</text>
+            <text class="dish__price">{{ formatPriceRange(dish.priceMinCents, dish.priceMaxCents) }}</text>
+          </view>
+          <view class="dish__meta">
+            <text class="dish__tag">{{ dish.cuisineLabel }}</text>
+            <text class="dish__tag">{{ dish.categoryLabel }}</text>
+            <text class="dish__tag">{{ dish.spicyLabel }}</text>
+            <text v-if="dish.calories" class="dish__tag">{{ dish.calories }} kcal</text>
+            <text v-if="dish.hasRecipe" class="dish__tag dish__tag--recipe">
+              可自制 {{ dish.cookMinutes }}min
+            </text>
+          </view>
         </view>
       </view>
     </view>
@@ -517,26 +528,39 @@ onShow(() => {
 
 .dish {
   position: relative;
-  padding: $fm-gap-md $fm-gap-lg;
+  display: flex;
+  align-items: center;
+  gap: $fm-gap-md;
+  padding: $fm-gap-md;
   background: $cy-surface;
   border: 1px solid $cy-line;
+  border-radius: $fm-radius-md;
   transition: all 0.16s ease;
 
-  /* 左侧霓虹条：hover/点击时的"通电"感 */
+  /* 左侧霓虹条：通电感 */
   &::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: rgba(0, 240, 255, 0.28);
+    top: 22%;
+    bottom: 22%;
+    width: 3px;
+    border-radius: $fm-radius-pill;
+    background: rgba(0, 240, 255, 0.45);
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   &__head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    gap: $fm-gap-sm;
   }
 
   &__name {

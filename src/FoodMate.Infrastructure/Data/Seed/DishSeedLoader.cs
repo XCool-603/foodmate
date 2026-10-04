@@ -35,6 +35,17 @@ internal sealed class DishSeedItem
 
     public string? Description { get; set; }
 
+    /// <summary>
+    /// 菜品图片地址。
+    /// </summary>
+    /// <remarks>
+    /// 留空时前端会渲染程序化生成的「霓虹卡面」（按菜系配色 + 按分类给图标），
+    /// 因此没有图片也不会出现空占位。
+    /// 想换成真实照片，把文件放进 <c>src/FoodMate.Api/wwwroot/images/dishes/</c>，
+    /// 这里填 <c>/images/dishes/xxx.jpg</c> 即可。
+    /// </remarks>
+    public string? ImageUrl { get; set; }
+
     public int Popularity { get; set; }
 
     public RecipeSeedItem? Recipe { get; set; }
@@ -104,6 +115,7 @@ public static class DishSeedLoader
             MealTimes = item.MealTimes,
             Seasons = item.Seasons,
             Description = item.Description,
+            ImageUrl = item.ImageUrl,
             Popularity = item.Popularity,
             IsBuiltin = true,
             OwnerUserId = null,

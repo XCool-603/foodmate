@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { onPullDownRefresh, onReachBottom, onShow } from '@dcloudio/uni-app'
+import DishArt from '@/components/DishArt.vue'
 import { useMetaStore, useRecordStore } from '@/stores'
 import { formatPriceRange } from '@/utils/format'
 
@@ -169,6 +170,15 @@ onReachBottom(() => {
         @tap="onEdit(item.id)"
         @longpress="onLongPress(item)"
       >
+        <!-- 优先用用户自己拍的照片，没有则用程序化卡面 -->
+        <DishArt
+          variant="thumb"
+          :name="item.dishName"
+          :cuisine="item.dishSnapshot.cuisine"
+          :category="item.dishSnapshot.category"
+          :spicy-level="item.dishSnapshot.spicyLevel"
+          :image-url="item.photoUrl"
+        />
         <view class="record__main">
           <text class="record__name">{{ item.dishName }}</text>
           <text class="record__meta">
