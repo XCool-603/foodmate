@@ -7,6 +7,13 @@
       }
     },
     {
+      "path": "pages/onboarding/index",
+      "style": {
+        "navigationBarTitleText": "告诉我你的口味",
+        "navigationStyle": "default"
+      }
+    },
+    {
       "path": "pages/decide/result",
       "style": {
         "navigationBarTitleText": "为你挑了这些",
@@ -31,6 +38,12 @@
       "path": "pages/records/edit",
       "style": {
         "navigationBarTitleText": "记一顿"
+      }
+    },
+    {
+      "path": "pages/records/stats",
+      "style": {
+        "navigationBarTitleText": "数据看板"
       }
     },
     {

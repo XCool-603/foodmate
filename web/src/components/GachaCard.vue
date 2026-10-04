@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ScoredDish } from '@/api'
+import AnimatedNumber from './AnimatedNumber.vue'
 import DishArt from './DishArt.vue'
 
 /**
@@ -84,6 +85,13 @@ function onTap() {
       <!-- 全息扫光 -->
       <view class="card__shine" />
 
+      <!-- 稀有度光爆：SSR / SR 翻开时来一下 -->
+      <view
+        v-if="revealed && (rarity.key === 'SSR' || rarity.key === 'SR')"
+        class="card__burst"
+        :class="`card__burst--${rarity.key.toLowerCase()}`"
+      />
+
       <!-- 顶部：稀有度 + 排名 -->
       <view class="card__top">
         <view class="rarity">
@@ -111,7 +119,12 @@ function onTap() {
 
         <view class="card__stars">
           <text class="card__stars-glyph">{{ stars }}</text>
-          <text class="card__score">{{ item.score }}</text>
+          <AnimatedNumber
+            class="card__score"
+            :value="item.score"
+            :decimals="1"
+            :duration="1100"
+          />
         </view>
 
         <!-- 推荐理由 -->
@@ -299,6 +312,33 @@ function onTap() {
     animation: card-shine 1s ease-out 0.12s 1;
   }
 
+  /* ── 稀有度光爆 ────────────────────────────────── */
+  &__burst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+
+    &--ssr {
+      background: radial-gradient(
+        circle at 50% 45%,
+        rgba(255, 197, 61, 0.35) 0%,
+        rgba(255, 46, 151, 0.18) 35%,
+        transparent 70%
+      );
+      animation: card-burst 1.1s ease-out 0.1s 1;
+    }
+
+    &--sr {
+      background: radial-gradient(
+        circle at 50% 45%,
+        rgba(255, 46, 151, 0.3) 0%,
+        transparent 68%
+      );
+      animation: card-burst 1s ease-out 0.1s 1;
+    }
+  }
+
   /* ── 顶部 ──────────────────────────────────────── */
   &__top {
     display: flex;
@@ -413,6 +453,21 @@ function onTap() {
   100% {
     transform: translateX(420%) rotate(18deg);
     opacity: 0;
+  }
+}
+
+/* 光爆：亮起 → 扩散 → 淡出，一次性 */
+@keyframes card-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
   }
 }
 

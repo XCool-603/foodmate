@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import GachaCard from '@/components/GachaCard.vue'
+import AnimatedNumber from '@/components/AnimatedNumber.vue'
 import { engineApi } from '@/api'
 import type { EngineMeta, ScoredDish } from '@/api'
 import { useDecisionStore, useRecordStore } from '@/stores'
@@ -20,6 +21,8 @@ const drawing = ref(false)
 const revealed = ref(false)
 /** 已抽过的菜，避免重复 */
 const drawnIds = ref<Set<string>>(new Set())
+/** 记录成功后的庆祝反馈 */
+const celebrating = ref(false)
 
 const highlighted = ref<string | null>(null)
 const expandedDishId = ref<string | null>(null)
@@ -161,19 +164,29 @@ async function onEatThis(item: ScoredDish) {
 async function afterRecorded(dishName: string) {
   await records.loadStats()
 
-  uni.showToast({ title: `已记录「${dishName}」`, icon: 'none' })
+  // 先给一个明确的"完成了"的视觉反馈，再问要不要打分
+  celebrating.value = true
+  try {
+    uni.vibrateShort({ type: 'heavy' })
+  } catch {
+    // 不支持时忽略
+  }
+
+  setTimeout(() => {
+    celebrating.value = false
+  }, 1100)
 
   setTimeout(() => {
     uni.showModal({
       title: '记下了',
-      content: '要顺手打个分吗？评分会让下次推荐更准。',
+      content: `「${dishName}」已加入记录。要顺手打个分吗？评分会让下次推荐更准。`,
       confirmText: '去打分',
       cancelText: '待会儿',
       success: (res) => {
         if (res.confirm) uni.switchTab({ url: '/pages/records/index' })
       },
     })
-  }, 700)
+  }, 1250)
 }
 
 function currentMealType(): number {
@@ -238,6 +251,15 @@ onLoad(async () => {
 
 <template>
   <view class="page">
+    <!-- ── 记录成功的庆祝反馈 ─────────────────────────── -->
+    <view v-if="celebrating" class="celebrate">
+      <view class="celebrate__ring" />
+      <view class="celebrate__ring celebrate__ring--2" />
+      <view class="celebrate__core anim-celebrate">
+        <text class="celebrate__glyph">✓</text>
+      </view>
+    </view>
+
     <!-- ── 抽卡区 ─────────────────────────────────────── -->
     <view class="gacha">
       <view class="gacha__head">
@@ -327,7 +349,7 @@ onLoad(async () => {
             {{ formatPriceRange(item.dish.priceMinCents, item.dish.priceMaxCents) }}
           </text>
         </view>
-        <text class="dish__score">{{ item.score }}</text>
+        <AnimatedNumber class="dish__score" :value="item.score" :decimals="1" :duration="700" />
       </view>
 
       <view class="reasons">
@@ -389,6 +411,88 @@ onLoad(async () => {
 .page {
   padding: $fm-gap-md;
   padding-bottom: 60rpx;
+}
+
+/* ── 庆祝反馈 ─────────────────────────────────────────────── */
+.celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 240, 255, 0.14) 0%,
+    transparent 55%
+  );
+  animation: celebrate-fade 1.1s ease-out both;
+
+  &__ring {
+    position: absolute;
+    width: 200rpx;
+    height: 200rpx;
+    border-radius: 50%;
+    border: 2px solid $cy-cyan;
+    box-shadow: 0 0 30rpx rgba(0, 240, 255, 0.7);
+    animation: celebrate-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    &--2 {
+      border-color: $cy-magenta;
+      box-shadow: 0 0 30rpx rgba(255, 46, 151, 0.7);
+      animation-delay: 0.12s;
+    }
+  }
+
+  &__core {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 240, 255, 0.14);
+    border: 2px solid $cy-cyan;
+    box-shadow:
+      0 0 40rpx rgba(0, 240, 255, 0.6),
+      inset 0 0 30rpx rgba(0, 240, 255, 0.2);
+  }
+
+  &__glyph {
+    font-size: 84rpx;
+    font-weight: 700;
+    color: $cy-cyan;
+    text-shadow: 0 0 24rpx rgba(0, 240, 255, 0.9);
+  }
+}
+
+/* 整个覆盖层淡出 */
+@keyframes celebrate-fade {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 圆环从中心扩散出去 */
+@keyframes celebrate-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
 }
 
 /* ── 抽卡区 ───────────────────────────────────────────────── */

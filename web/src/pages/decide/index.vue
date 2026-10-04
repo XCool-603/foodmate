@@ -4,11 +4,12 @@ import { onShow } from '@dcloudio/uni-app'
 import { dishApi } from '@/api'
 import type { DishBrief } from '@/api'
 import DishArt from '@/components/DishArt.vue'
-import { useDecisionStore, useMetaStore } from '@/stores'
+import { useAuthStore, useDecisionStore, useMetaStore } from '@/stores'
 import { formatPriceRange, greeting, mealPrompt } from '@/utils/format'
 
 const meta = useMetaStore()
 const decision = useDecisionStore()
+const auth = useAuthStore()
 const deciding = ref(false)
 
 /* ── 决策条件（提交给决策引擎）── */
@@ -132,9 +133,17 @@ function onDishTap(dish: DishBrief) {
   uni.navigateTo({ url: `/pages/dish/detail?id=${dish.id}` })
 }
 
+function onStartOnboarding() {
+  uni.navigateTo({ url: '/pages/onboarding/index' })
+}
+
 onShow(() => {
   void meta.checkConnection()
+  void meta.loadEnums()
   void loadDishes()
+
+  // 首次登录后补一次用户资料，拿到 needsOnboarding
+  if (auth.isAuthenticated) void auth.loadMe()
 })
 </script>
 
@@ -151,6 +160,21 @@ onShow(() => {
       <text class="hero__greeting">{{ greetingText }}，欢迎回来</text>
       <text class="hero__title">{{ promptText }}</text>
       <view class="hero__scan" />
+    </view>
+
+    <!-- ── 引导提示（仅未完成引导时）──────────────────── -->
+    <view
+      v-if="auth.needsOnboarding"
+      class="onboard anim-pop"
+      hover-class="hover-dim"
+      @tap="onStartOnboarding"
+    >
+      <text class="onboard__glyph anim-float">✦</text>
+      <view class="onboard__body">
+        <text class="onboard__title">先告诉我你的口味</text>
+        <text class="onboard__desc">5 个问题 · 30 秒 · 之后推荐才准</text>
+      </view>
+      <text class="onboard__arrow">›</text>
     </view>
 
     <!-- ── 怎么吃 ─────────────────────────────────────── -->
@@ -289,11 +313,12 @@ onShow(() => {
       暂无菜品。请确认后端已启动并完成种子数据导入。
     </view>
 
-    <view v-else class="dish-list">
+    <view v-else class="dish-list anim-stagger">
       <view
         v-for="dish in dishes"
         :key="dish.id"
         class="dish"
+        hover-class="hover-lift"
         @tap="onDishTap(dish)"
       >
         <DishArt
@@ -398,6 +423,51 @@ onShow(() => {
     inset: 0;
     @include scanlines(0.035);
     pointer-events: none;
+  }
+}
+
+/* ── 引导提示 ─────────────────────────────────────────────── */
+.onboard {
+  display: flex;
+  align-items: center;
+  gap: $fm-gap-md;
+  padding: $fm-gap-md $fm-gap-lg;
+  margin-bottom: $fm-gap-md;
+  border-radius: $fm-radius-md;
+  background:
+    linear-gradient(100deg, rgba(255, 46, 151, 0.16), rgba(0, 240, 255, 0.1)),
+    $cy-surface;
+  border: 1px solid $cy-magenta;
+  box-shadow: 0 0 18rpx rgba(255, 46, 151, 0.3);
+
+  &__glyph {
+    font-size: 40rpx;
+    color: $cy-amber;
+    text-shadow: 0 0 16rpx rgba(255, 197, 61, 0.8);
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4rpx;
+  }
+
+  &__title {
+    font-size: 29rpx;
+    font-weight: 700;
+  }
+
+  &__desc {
+    font-family: $cy-mono;
+    font-size: 20rpx;
+    color: $cy-text-faint;
+  }
+
+  &__arrow {
+    font-size: 40rpx;
+    color: $cy-magenta;
+    text-shadow: 0 0 12rpx rgba(255, 46, 151, 0.7);
   }
 }
 

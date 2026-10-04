@@ -198,7 +198,121 @@ page {
   text-shadow: 0 0 12rpx rgba(255, 59, 92, 0.5);
 }
 
-/* ── 动画 ─────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+ *  动画系统
+ *
+ *  原则：动效服务于「状态变化」，不是装饰。
+ *    · 进场 → 让用户知道内容来了（fade-up / pop）
+ *    · 加载 → 让等待有反馈（shimmer 骨架屏）
+ *    · 强调 → 让重要数字被看见（count-up / glow）
+ *    · 反馈 → 让点击有回应（press 缩放）
+ *  所有时长控制在 0.2–0.6s，超过 0.6s 就会显得拖沓。
+ * ═══════════════════════════════════════════════════════════ */
+
+/* ── 关键帧 ───────────────────────────────────────────────── */
+
+/* 淡入上移：最常用的进场 */
+@keyframes fm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(26rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 淡入（无位移）：用于不适合移动的元素 */
+@keyframes fm-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 弹入：带轻微过冲，用于卡片、徽标 */
+@keyframes fm-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 从右侧滑入 */
+@keyframes fm-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 骨架屏微光扫过 */
+@keyframes fm-shimmer {
+  0% {
+    background-position: -180% 0;
+  }
+  100% {
+    background-position: 180% 0;
+  }
+}
+
+/* 霓虹呼吸 */
+@keyframes fm-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 缓慢浮动 */
+@keyframes fm-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10rpx);
+  }
+}
+
+/* 成功庆祝：一次性的放大回弹 */
+@keyframes fm-celebrate {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 按钮扫光 */
 @keyframes fm-sweep {
   0%,
   60% {
@@ -206,17 +320,6 @@ page {
   }
   100% {
     left: 130%;
-  }
-}
-
-/* 霓虹呼吸：用于强调"进行中"的元素 */
-@keyframes fm-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
   }
 }
 
@@ -240,5 +343,87 @@ page {
     transform: translate(-1rpx, -1rpx);
     opacity: 0.9;
   }
+}
+
+/* ── 工具类 ───────────────────────────────────────────────── */
+
+/* 统一缓动：先快后慢，有"落位"感 */
+$fm-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+.anim-in {
+  animation: fm-fade-up 0.44s $fm-ease both;
+}
+
+.anim-fade {
+  animation: fm-fade 0.4s ease both;
+}
+
+.anim-pop {
+  animation: fm-pop 0.46s $fm-ease both;
+}
+
+.anim-slide {
+  animation: fm-slide-right 0.42s $fm-ease both;
+}
+
+.anim-float {
+  animation: fm-float 3s ease-in-out infinite;
+}
+
+.anim-glow {
+  animation: fm-pulse 1.8s ease-in-out infinite;
+}
+
+.anim-celebrate {
+  animation: fm-celebrate 0.62s $fm-ease both;
+}
+
+/**
+ * 交错入场：给容器加这个类，子元素会依次进场。
+ * 只定义到第 12 个 —— 再多用户也感知不到差别，反而显得慢。
+ */
+.anim-stagger > * {
+  animation: fm-fade-up 0.42s $fm-ease both;
+}
+
+.anim-stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.anim-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.anim-stagger > *:nth-child(3) { animation-delay: 0.1s; }
+.anim-stagger > *:nth-child(4) { animation-delay: 0.14s; }
+.anim-stagger > *:nth-child(5) { animation-delay: 0.18s; }
+.anim-stagger > *:nth-child(6) { animation-delay: 0.22s; }
+.anim-stagger > *:nth-child(7) { animation-delay: 0.26s; }
+.anim-stagger > *:nth-child(8) { animation-delay: 0.3s; }
+.anim-stagger > *:nth-child(9) { animation-delay: 0.34s; }
+.anim-stagger > *:nth-child(10) { animation-delay: 0.38s; }
+.anim-stagger > *:nth-child(11) { animation-delay: 0.42s; }
+.anim-stagger > *:nth-child(12) { animation-delay: 0.46s; }
+
+/**
+ * 按压反馈。
+ * 用 uni-app 的 hover-class 而不是 CSS :active ——
+ * 后者在小程序端不可靠，hover-class 是三端都支持的机制。
+ */
+.hover-dim {
+  opacity: 0.78;
+  transform: scale(0.982);
+}
+
+.hover-lift {
+  transform: translateY(-3rpx);
+  box-shadow: 0 6rpx 22rpx rgba(0, 240, 255, 0.22);
+}
+
+/* 骨架屏基底 */
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    $cy-surface-2 30%,
+    rgba(0, 240, 255, 0.09) 50%,
+    $cy-surface-2 70%
+  );
+  background-size: 220% 100%;
+  animation: fm-shimmer 1.5s linear infinite;
+  border-radius: $fm-radius-sm;
 }
 </style>

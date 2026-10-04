@@ -41,6 +41,11 @@ function onEdit(id: string) {
   uni.navigateTo({ url: `/pages/records/edit?id=${id}` })
 }
 
+/** 打开数据看板。 */
+function onOpenStats() {
+  uni.navigateTo({ url: '/pages/records/stats' })
+}
+
 /** 一键评分。 */
 async function onQuickRate(id: string, rating: number) {
   try {
@@ -105,12 +110,13 @@ onReachBottom(() => {
 <template>
   <view class="page">
     <!-- 本周统计 -->
-    <view class="fm-card stats">
+    <view class="fm-card stats" hover-class="hover-dim" @tap="onOpenStats">
       <view class="stats__head">
         <text class="stats__title">{{ weekLabel }}</text>
         <text v-if="records.stats?.averageRating" class="stats__rating">
           平均 {{ records.stats.averageRating }} 分
         </text>
+        <text class="stats__more">看板 ›</text>
       </view>
       <view class="stats__row">
         <view class="stats__item">
@@ -212,6 +218,14 @@ onReachBottom(() => {
 }
 
 /* ── 统计 ── */
+.stats__more {
+  margin-left: auto;
+  font-family: $cy-mono;
+  font-size: 21rpx;
+  color: $cy-cyan;
+  text-shadow: 0 0 10rpx rgba(0, 240, 255, 0.5);
+}
+
 .stats {
   &__head {
     display: flex;

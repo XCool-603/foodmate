@@ -106,6 +106,16 @@ function onOpenPreference() {
   uni.navigateTo({ url: '/pages/mine/preference' })
 }
 
+/** 打开数据看板。 */
+function onOpenStats() {
+  uni.navigateTo({ url: '/pages/records/stats' })
+}
+
+/** 重做口味引导。 */
+function onRestartOnboarding() {
+  uni.navigateTo({ url: '/pages/onboarding/index' })
+}
+
 function onOpenRecords() {
   uni.switchTab({ url: '/pages/records/index' })
 }
@@ -182,14 +192,24 @@ onShow(() => {
 
     <!-- 入口 -->
     <view class="fm-card menu">
-      <view class="menu__item" @tap="onOpenPreference">
+      <view class="menu__item" hover-class="hover-dim" @tap="onOpenPreference">
         <text class="menu__label">口味画像</text>
         <text class="menu__hint">辣度 · 预算 · 忌口 · 偏好菜系</text>
         <text class="menu__arrow">›</text>
       </view>
-      <view class="menu__item" @tap="onOpenRecords">
+      <view class="menu__item" hover-class="hover-dim" @tap="onOpenStats">
+        <text class="menu__label">数据看板</text>
+        <text class="menu__hint">热量趋势 · 菜系与餐次分布</text>
+        <text class="menu__arrow">›</text>
+      </view>
+      <view class="menu__item" hover-class="hover-dim" @tap="onOpenRecords">
         <text class="menu__label">饮食记录</text>
         <text class="menu__hint">共 {{ summary?.totalRecords ?? 0 }} 条</text>
+        <text class="menu__arrow">›</text>
+      </view>
+      <view class="menu__item" hover-class="hover-dim" @tap="onRestartOnboarding">
+        <text class="menu__label">重新做口味引导</text>
+        <text class="menu__hint">口味变了？30 秒重来一次</text>
         <text class="menu__arrow">›</text>
       </view>
     </view>
