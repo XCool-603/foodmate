@@ -554,7 +554,7 @@ onLoad(async (options) => {
 
   &__star {
     font-size: 56rpx;
-    color: #d9dbe0;
+    color: $cy-surface-3;
 
     &--on {
       color: $fm-primary;

@@ -409,13 +409,18 @@ onReachBottom(() => {
   bottom: 60rpx;
   width: 108rpx;
   height: 108rpx;
-  border-radius: 50%;
-  background: $fm-primary;
-  color: #fff;
-  font-size: 56rpx;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid $cy-cyan;
+  color: $cy-cyan;
+  font-size: 52rpx;
+  font-weight: 300;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow:
+    0 0 18rpx rgba(0, 240, 255, 0.45),
+    inset 0 0 22rpx rgba(0, 240, 255, 0.12);
+  text-shadow: 0 0 14rpx rgba(0, 240, 255, 0.8);
   box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.4);
 }
 </style>

@@ -182,15 +182,18 @@ onShow(() => {
     flex: 1;
     text-align: center;
     padding: 20rpx;
-    border-radius: 999rpx;
-    background: $fm-bg-muted;
-    font-size: 27rpx;
-    color: $fm-text-secondary;
+    background: $cy-surface-2;
+    border: 1px solid $cy-line;
+    font-family: $cy-mono;
+    font-size: 25rpx;
+    color: $cy-text-dim;
 
     &--primary {
-      background: $fm-primary;
-      color: #fff;
-      font-weight: 600;
+      background: rgba(0, 240, 255, 0.14);
+      border: 1px solid $cy-cyan;
+      color: $cy-cyan;
+      font-weight: 700;
+      box-shadow: 0 0 14rpx rgba(0, 240, 255, 0.3);
     }
   }
 }

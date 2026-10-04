@@ -304,11 +304,13 @@ onLoad((options) => {
 }
 
 .chip {
-  font-size: 22rpx;
-  color: $fm-primary;
-  background: $fm-primary-soft;
-  border-radius: 999rpx;
-  padding: 6rpx 20rpx;
+  font-family: $cy-mono;
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  color: $cy-cyan;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  padding: 4rpx 16rpx;
 }
 
 .banner {
@@ -423,15 +425,18 @@ onLoad((options) => {
   &__index {
     width: 44rpx;
     height: 44rpx;
-    border-radius: 50%;
-    background: $fm-primary;
-    color: #fff;
+    background: rgba(0, 240, 255, 0.14);
+    border: 1px solid $cy-cyan;
+    color: $cy-cyan;
+    font-family: $cy-mono;
     font-size: 24rpx;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     margin-top: 4rpx;
+    box-shadow: 0 0 12rpx rgba(0, 240, 255, 0.3);
   }
 
   &__body {

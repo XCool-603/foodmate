@@ -24,11 +24,19 @@ const emit = defineEmits<{
 
 const CANVAS_ID = 'fm-wheel'
 
-/** 扇区配色：暖色系交替，保证相邻扇区可区分。 */
+/**
+ * 扇区配色：深色底 + 霓虹倾向。
+ * 深夜食堂的霓虹招牌就是这个路子 —— 底色压暗，让青色文字与描边发光。
+ */
 const SECTOR_COLORS = [
-  '#FF8C5F', '#FFB088', '#FF6B35', '#FFA07A',
-  '#FFC9A8', '#FF7F4D', '#FFD4BC', '#FF9466',
+  '#0B4A55', '#5E0F3D', '#2C1560', '#0B5245',
+  '#0A3F52', '#6B1230', '#3A1560', '#0B4A3D',
 ]
+
+const NEON_CYAN = '#00F0FF'
+const NEON_MAGENTA = '#FF2E97'
+const VOID = '#05050A'
+const SURFACE = '#0E0E18'
 
 const instance = getCurrentInstance()
 
@@ -53,18 +61,25 @@ function draw() {
 
   const size = diameter()
   const center = size / 2
-  const radius = center - 4
+  const radius = center - 6
   const sector = (Math.PI * 2) / items.length
 
   const ctx = context()
 
-  // 背板
+  // ── 外圈光晕（两层，营造霓虹溢光）─────────────────────
   ctx.beginPath()
-  ctx.arc(center, center, radius, 0, Math.PI * 2)
-  ctx.setFillStyle('#FFFFFF')
-  ctx.fill()
+  ctx.arc(center, center, radius + 3, 0, Math.PI * 2)
+  ctx.setStrokeStyle('rgba(0, 240, 255, 0.18)')
+  ctx.setLineWidth(8)
+  ctx.stroke()
 
-  // 扇区
+  ctx.beginPath()
+  ctx.arc(center, center, radius + 1, 0, Math.PI * 2)
+  ctx.setStrokeStyle(NEON_CYAN)
+  ctx.setLineWidth(2)
+  ctx.stroke()
+
+  // ── 扇区 ────────────────────────────────────────────────
   items.forEach((item, index) => {
     const start = index * sector + (rotation * Math.PI) / 180
     const end = start + sector
@@ -76,38 +91,69 @@ function draw() {
     ctx.setFillStyle(SECTOR_COLORS[index % SECTOR_COLORS.length])
     ctx.fill()
 
-    // 菜名：沿扇区中线排布
+    // 扇区分隔线：细霓虹，让每个格子像独立的灯箱
+    ctx.beginPath()
+    ctx.moveTo(center, center)
+    ctx.lineTo(
+      center + Math.cos(start) * radius,
+      center + Math.sin(start) * radius,
+    )
+    ctx.setStrokeStyle('rgba(0, 240, 255, 0.35)')
+    ctx.setLineWidth(1)
+    ctx.stroke()
+
+    // 菜名：沿扇区中线排布，带发光
     const mid = start + sector / 2
 
     ctx.save()
     ctx.translate(center, center)
     ctx.rotate(mid)
-    ctx.setFillStyle('#FFFFFF')
     ctx.setFontSize(Math.max(11, Math.round(size / 26)))
     ctx.setTextAlign('right')
     ctx.setTextBaseline('middle')
-    ctx.fillText(shortName(item.name), radius - 12, 0)
+    ctx.setShadow(0, 0, 8, NEON_CYAN)
+    ctx.setFillStyle('#EAFDFF')
+    ctx.fillText(shortName(item.name), radius - 14, 0)
     ctx.restore()
   })
 
-  // 中心圆
+  // ── 中心盘 ──────────────────────────────────────────────
+  const hubRadius = Math.round(size * 0.14)
+
   ctx.beginPath()
-  ctx.arc(center, center, Math.round(size * 0.13), 0, Math.PI * 2)
-  ctx.setFillStyle('#FFFFFF')
+  ctx.arc(center, center, hubRadius + 3, 0, Math.PI * 2)
+  ctx.setFillStyle('rgba(0, 240, 255, 0.2)')
   ctx.fill()
-  ctx.setFillStyle('#FF6B35')
+
+  ctx.beginPath()
+  ctx.arc(center, center, hubRadius, 0, Math.PI * 2)
+  ctx.setFillStyle(SURFACE)
+  ctx.fill()
+  ctx.setStrokeStyle(NEON_CYAN)
+  ctx.setLineWidth(2)
+  ctx.stroke()
+
   ctx.setFontSize(Math.max(12, Math.round(size / 22)))
   ctx.setTextAlign('center')
   ctx.setTextBaseline('middle')
+  ctx.setShadow(0, 0, 10, NEON_CYAN)
+  ctx.setFillStyle(NEON_CYAN)
   ctx.fillText('吃啥', center, center)
 
-  // 顶部指针
+  // ── 顶部指针 ────────────────────────────────────────────
+  ctx.setShadow(0, 0, 12, NEON_MAGENTA)
   ctx.beginPath()
   ctx.moveTo(center, 2)
-  ctx.lineTo(center - 9, 22)
-  ctx.lineTo(center + 9, 22)
+  ctx.lineTo(center - 10, 24)
+  ctx.lineTo(center + 10, 24)
   ctx.closePath()
-  ctx.setFillStyle('#1F2329')
+  ctx.setFillStyle(NEON_MAGENTA)
+  ctx.fill()
+
+  // 指针下的小圆点，像指示灯
+  ctx.beginPath()
+  ctx.arc(center, 30, 3, 0, Math.PI * 2)
+  ctx.setFillStyle('#FFFFFF')
   ctx.fill()
 
   ctx.draw()
@@ -197,9 +243,28 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+
+  /* 转盘背后的氛围光，让整块区域"亮"起来 */
+  &::before {
+    content: '';
+    position: absolute;
+    width: 88%;
+    height: 88%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(0, 240, 255, 0.16) 0%,
+      rgba(255, 46, 151, 0.08) 45%,
+      transparent 70%
+    );
+    filter: blur(18px);
+    pointer-events: none;
+  }
 
   &__canvas {
     display: block;
+    position: relative;
   }
 }
 </style>

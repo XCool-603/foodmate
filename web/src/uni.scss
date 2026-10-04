@@ -1,45 +1,162 @@
-/* 美食伴侣 · 主题变量
- * 暖橙色系，贴合「食物」的调性。
- * 小程序不支持 CSS 变量穿透组件，故同时提供 SCSS 变量与 CSS 变量两种用法。 */
+/* ═══════════════════════════════════════════════════════════
+ *  美食伴侣 · 赛博朋克主题
+ *
+ *  设计概念：霓虹深夜食堂
+ *  —— 深夜街边的霓虹面摊，潮湿的柏油路反射着招牌的光。
+ *     冷色霓虹（青/品红）是环境，暖色（琥珀）留给食物本身。
+ *
+ *  ⚠️ 保留 $fm-* 变量名（值全部替换为赛博朋克配色），
+ *     这样所有页面无需改动即可换肤；新效果用 $cy-* 与 mixin。
+ * ═══════════════════════════════════════════════════════════ */
 
-/* ── SCSS 变量（供 <style lang="scss"> 直接使用）── */
-$fm-primary: #ff6b35;
-$fm-primary-light: #ff8c5f;
-$fm-primary-soft: #fff1ea;
+/* ── 背景层次 ─────────────────────────────────────────────── */
+$cy-void: #05050A;        // 最深：页面底色
+$cy-bg: #08080F;          // 页面
+$cy-surface: #0E0E18;     // 卡片
+$cy-surface-2: #14141F;   // 次级面（chip / 输入框）
+$cy-surface-3: #1B1B29;   // 悬浮态
+$cy-line: #22223A;        // 分隔线
 
-$fm-text: #1f2329;
-$fm-text-secondary: #5a6270;
-$fm-text-tertiary: #9aa0a6;
-$fm-text-inverse: #ffffff;
+/* ── 霓虹主色 ─────────────────────────────────────────────── */
+$cy-cyan: #00F0FF;        // 主色：冷霓虹
+$cy-cyan-dim: #0A8F99;
+$cy-magenta: #FF2E97;     // 强调：品红霓虹
+$cy-magenta-dim: #99225C;
+$cy-amber: #FFC53D;       // 食物温度：暖光
+$cy-lime: #00FF9F;        // 成功
+$cy-red: #FF3B5C;         // 危险
+$cy-violet: #A855F7;      // 次强调
 
-$fm-bg-page: #f5f6f8;
-$fm-bg-card: #ffffff;
-$fm-bg-muted: #f0f1f4;
+/* ── 文字 ─────────────────────────────────────────────────── */
+$cy-text: #E8E8F4;
+$cy-text-dim: #9A9AB8;
+$cy-text-faint: #55556E;
+$cy-text-void: #05050A;
 
-$fm-border: #e8eaed;
-$fm-danger: #e5484d;
-$fm-success: #30a46c;
-$fm-warning: #f5a623;
+/* ── 等宽字体栈（数字与 HUD 标签用）───────────────────────── */
+$cy-mono: 'SF Mono', 'JetBrains Mono', Consolas, Monaco, 'Courier New', monospace;
 
-$fm-radius-sm: 8rpx;
-$fm-radius-md: 16rpx;
-$fm-radius-lg: 24rpx;
+/* ═══════════════════════════════════════════════════════════
+ *  兼容层：原有 $fm-* 变量指向新配色
+ * ═══════════════════════════════════════════════════════════ */
+$fm-primary: $cy-cyan;
+$fm-primary-light: #5CF7FF;
+$fm-primary-soft: rgba(0, 240, 255, 0.12);
+
+$fm-text: $cy-text;
+$fm-text-secondary: $cy-text-dim;
+$fm-text-tertiary: $cy-text-faint;
+$fm-text-inverse: $cy-text-void;
+
+$fm-bg-page: $cy-bg;
+$fm-bg-card: $cy-surface;
+$fm-bg-muted: $cy-surface-2;
+
+$fm-border: $cy-line;
+$fm-danger: $cy-red;
+$fm-success: $cy-lime;
+$fm-warning: $cy-amber;
+
+/* 直角化：赛博朋克不用圆角 */
+$fm-radius-sm: 0;
+$fm-radius-md: 0;
+$fm-radius-lg: 0;
 
 $fm-gap-sm: 12rpx;
 $fm-gap-md: 24rpx;
 $fm-gap-lg: 32rpx;
 
-/* ── uni-app 内置变量覆盖 ── */
-$uni-color-primary: $fm-primary;
-$uni-color-success: $fm-success;
-$uni-color-warning: $fm-warning;
-$uni-color-error: $fm-danger;
+/* ═══════════════════════════════════════════════════════════
+ *  Mixin
+ * ═══════════════════════════════════════════════════════════ */
 
-$uni-text-color: $fm-text;
-$uni-text-color-grey: $fm-text-tertiary;
-$uni-text-color-placeholder: $fm-text-tertiary;
+/// 霓虹发光。三层叠加：贴近的亮边、外扩的光晕、向内的微光。
+@mixin neon($color, $strength: 1) {
+  box-shadow:
+    0 0 (6rpx * $strength) rgba($color, 0.55),
+    0 0 (20rpx * $strength) rgba($color, 0.22),
+    inset 0 0 (16rpx * $strength) rgba($color, 0.06);
+}
 
-$uni-bg-color: $fm-bg-card;
-$uni-bg-color-grey: $fm-bg-page;
+/// 文字霓虹。
+@mixin neon-text($color, $strength: 1) {
+  color: $color;
+  text-shadow:
+    0 0 (8rpx * $strength) rgba($color, 0.75),
+    0 0 (24rpx * $strength) rgba($color, 0.35);
+}
 
-$uni-border-color: $fm-border;
+/// 面板：暗底 + 细边 + 左上角霓虹标记。
+@mixin panel($accent: $cy-cyan) {
+  position: relative;
+  background:
+    linear-gradient(150deg, rgba($accent, 0.05) 0%, transparent 45%),
+    $cy-surface;
+  border: 1px solid $cy-line;
+  box-shadow: inset 0 0 40rpx rgba($accent, 0.04);
+}
+
+/// 面板的角标（用 ::after 画右上角的 L 形）。调用前需 position: relative。
+@mixin corner-mark($color: $cy-cyan, $size: 18rpx) {
+  &::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: $size;
+    height: $size;
+    border-top: 2px solid $color;
+    border-right: 2px solid $color;
+    pointer-events: none;
+  }
+}
+
+/// 左侧霓虹竖条（表示"这一块是活的"）。
+@mixin accent-bar($color: $cy-cyan, $width: 3px) {
+  border-left: $width solid $color;
+  box-shadow:
+    -#{$width} 0 (14rpx) rgba($color, 0.4),
+    inset 0 0 40rpx rgba($color, 0.04);
+}
+
+/// HUD 小标签：等宽、大写间距、暗色。
+@mixin hud-label($color: $cy-text-faint) {
+  font-family: $cy-mono;
+  font-size: 20rpx;
+  letter-spacing: 2rpx;
+  color: $color;
+  text-transform: uppercase;
+}
+
+/// 扫描线叠加（用在 hero 区块上）。
+@mixin scanlines($alpha: 0.04) {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0, 240, 255, $alpha) 0px,
+    rgba(0, 240, 255, $alpha) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+ *  uni-app 内置变量覆盖
+ * ═══════════════════════════════════════════════════════════ */
+$uni-color-primary: $cy-cyan;
+$uni-color-success: $cy-lime;
+$uni-color-warning: $cy-amber;
+$uni-color-error: $cy-red;
+
+$uni-text-color: $cy-text;
+$uni-text-color-inverse: $cy-text-void;
+$uni-text-color-grey: $cy-text-dim;
+$uni-text-color-placeholder: $cy-text-faint;
+$uni-text-color-disable: $cy-text-faint;
+
+$uni-bg-color: $cy-surface;
+$uni-bg-color-grey: $cy-bg;
+
+$uni-border-color: $cy-line;
+
+$uni-border-radius-base: 0;
+$uni-border-radius-lg: 0;

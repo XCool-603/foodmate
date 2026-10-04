@@ -10,7 +10,7 @@ const meta = useMetaStore()
 const decision = useDecisionStore()
 const deciding = ref(false)
 
-/* ── 决策条件（M1 将把这些参数提交给决策引擎）── */
+/* ── 决策条件（提交给决策引擎）── */
 const diningMode = ref(0)
 const budgetMin = ref(1500)
 const budgetMax = ref(5000)
@@ -19,9 +19,18 @@ const selectedMoods = ref<string[]>([])
 
 const greetingText = computed(() => greeting())
 const promptText = computed(() => mealPrompt())
-const budgetText = computed(
-  () => `${formatPriceRange(budgetMin.value, budgetMax.value)}`,
-)
+const budgetText = computed(() => formatPriceRange(budgetMin.value, budgetMax.value))
+
+/** 顶部状态栏的读数，模仿终端 HUD。 */
+const systemLine = computed(() => {
+  if (meta.state === 'online') {
+    return `SYS · ONLINE · DISH ${meta.dishCount}`
+  }
+  if (meta.state === 'checking') {
+    return 'SYS · CONNECTING…'
+  }
+  return 'SYS · OFFLINE'
+})
 
 const diningModes = computed(() => meta.enums?.diningMode ?? [
   { value: 0, label: '随便' },
@@ -39,7 +48,7 @@ const partyOptions = [
   { value: 5, label: '5 人以上' },
 ]
 
-/* ── 菜品库预览（M0 用它证明前后端已打通）── */
+/* ── 菜品库预览 ── */
 const dishes = ref<DishBrief[]>([])
 const loadingDishes = ref(false)
 
@@ -92,7 +101,6 @@ async function onDecide() {
 
   try {
     const response = await decision.suggest({
-      // 不传餐次，交给服务端按当前时间推断
       mealType: null,
       diningMode: diningMode.value,
       partySize: partySize.value,
@@ -120,16 +128,7 @@ async function onDecide() {
 }
 
 function onDishTap(dish: DishBrief) {
-  uni.showModal({
-    title: dish.name,
-    content:
-      `${dish.cuisineLabel} · ${dish.categoryLabel} · ${dish.spicyLabel}\n` +
-      `${formatPriceRange(dish.priceMinCents, dish.priceMaxCents)}` +
-      (dish.calories ? ` · 约 ${dish.calories} kcal` : '') +
-      `\n标签：${dish.tags.join('、') || '无'}` +
-      (dish.hasRecipe ? `\n可自己做（约 ${dish.cookMinutes} 分钟）` : ''),
-    showCancel: false,
-  })
+  uni.navigateTo({ url: `/pages/dish/detail?id=${dish.id}` })
 }
 
 onShow(() => {
@@ -140,15 +139,25 @@ onShow(() => {
 
 <template>
   <view class="page">
-    <!-- 问候 -->
-    <view class="hero">
-      <text class="hero__greeting">{{ greetingText }} 👋</text>
-      <text class="hero__prompt">{{ promptText }}</text>
+    <!-- ── 顶部状态栏 ─────────────────────────────────── -->
+    <view class="sysbar">
+      <text class="sysbar__dot" :class="`sysbar__dot--${meta.state}`">●</text>
+      <text class="sysbar__text">{{ systemLine }}</text>
     </view>
 
-    <!-- 怎么吃 -->
+    <!-- ── 主视觉 ─────────────────────────────────────── -->
+    <view class="hero">
+      <text class="hero__greeting">{{ greetingText }}，欢迎回来</text>
+      <text class="hero__title">{{ promptText }}</text>
+      <view class="hero__scan" />
+    </view>
+
+    <!-- ── 怎么吃 ─────────────────────────────────────── -->
     <view class="fm-card">
-      <text class="section-title">怎么吃</text>
+      <view class="head">
+        <text class="head__mark">01</text>
+        <text class="head__title">怎么吃</text>
+      </view>
       <view class="fm-chips">
         <view
           v-for="m in diningModes"
@@ -162,43 +171,51 @@ onShow(() => {
       </view>
     </view>
 
-    <!-- 预算 -->
+    <!-- ── 预算 ───────────────────────────────────────── -->
     <view class="fm-card">
-      <view class="section-head">
-        <text class="section-title">预算</text>
-        <text class="section-value">{{ budgetText }}</text>
+      <view class="head">
+        <text class="head__mark">02</text>
+        <text class="head__title">预算</text>
+        <text class="head__value">{{ budgetText }}</text>
       </view>
       <view class="slider-row">
-        <text class="slider-row__label">下限</text>
+        <text class="slider-row__label">MIN</text>
         <slider
           class="slider-row__slider"
           :value="budgetMin"
           :min="0"
           :max="20000"
           :step="500"
-          activeColor="#FF6B35"
-          block-size="20"
+          activeColor="#00F0FF"
+          backgroundColor="#1B1B29"
+          block-color="#00F0FF"
+          block-size="18"
           @change="onBudgetMin"
         />
       </view>
       <view class="slider-row">
-        <text class="slider-row__label">上限</text>
+        <text class="slider-row__label">MAX</text>
         <slider
           class="slider-row__slider"
           :value="budgetMax"
           :min="0"
           :max="20000"
           :step="500"
-          activeColor="#FF6B35"
-          block-size="20"
+          activeColor="#00F0FF"
+          backgroundColor="#1B1B29"
+          block-color="#00F0FF"
+          block-size="18"
           @change="onBudgetMax"
         />
       </view>
     </view>
 
-    <!-- 人数 -->
+    <!-- ── 人数 ───────────────────────────────────────── -->
     <view class="fm-card">
-      <text class="section-title">几个人吃</text>
+      <view class="head">
+        <text class="head__mark">03</text>
+        <text class="head__title">几个人吃</text>
+      </view>
       <view class="fm-chips">
         <view
           v-for="p in partyOptions"
@@ -212,11 +229,12 @@ onShow(() => {
       </view>
     </view>
 
-    <!-- 想吃点 -->
+    <!-- ── 想吃点 ─────────────────────────────────────── -->
     <view class="fm-card">
-      <view class="section-head">
-        <text class="section-title">想吃点</text>
-        <text class="section-hint">最多 3 个</text>
+      <view class="head">
+        <text class="head__mark">04</text>
+        <text class="head__title">想吃点</text>
+        <text class="head__hint">{{ selectedMoods.length }}/3</text>
       </view>
       <view class="fm-chips">
         <view
@@ -231,43 +249,45 @@ onShow(() => {
       </view>
     </view>
 
-    <!-- 主 CTA -->
+    <!-- ── 主 CTA ─────────────────────────────────────── -->
     <view
-      class="fm-button"
+      class="fm-button cta"
       :class="{ 'fm-button--disabled': deciding }"
       @tap="onDecide"
     >
-      {{ deciding ? '正在挑…' : '帮我决定 🤔' }}
+      {{ deciding ? '正在计算…' : '帮我决定' }}
     </view>
 
-    <!-- 后端连接状态 -->
+    <!-- ── 连接状态 ───────────────────────────────────── -->
     <view class="status" :class="`status--${meta.state}`">
-      <text class="status__dot">●</text>
-      <view class="status__body">
-        <text class="status__title">
-          {{ meta.isOnline ? '后端已连接' : meta.state === 'checking' ? '正在连接…' : '后端未连接' }}
+      <view class="status__row">
+        <text class="status__key">ENDPOINT</text>
+        <text class="status__val">{{ meta.apiBaseUrl }}</text>
+      </view>
+      <view v-if="meta.isOnline" class="status__row">
+        <text class="status__key">SERVICE</text>
+        <text class="status__val status__val--ok">
+          v{{ meta.health?.version }} · {{ meta.health?.environment }} · {{ meta.platformLabel }}
         </text>
-        <text class="status__detail">{{ meta.apiBaseUrl }}</text>
-        <text v-if="meta.isOnline" class="status__detail">
-          {{ meta.health?.name }} v{{ meta.health?.version }} · {{ meta.health?.environment }} ·
-          菜品 {{ meta.dishCount }} 道 · {{ meta.platformLabel }}端
-        </text>
-        <text v-else-if="meta.errorMessage" class="status__detail status__detail--error">
-          {{ meta.errorMessage }}
-        </text>
+      </view>
+      <view v-else-if="meta.errorMessage" class="status__row">
+        <text class="status__key">ERROR</text>
+        <text class="status__val status__val--err">{{ meta.errorMessage }}</text>
       </view>
     </view>
 
-    <!-- 菜品库预览 -->
-    <view class="section-head section-head--list">
-      <text class="section-title">菜品库</text>
-      <text class="section-hint">{{ dishes.length }} / {{ meta.dishCount }} 道</text>
+    <!-- ── 菜品库 ─────────────────────────────────────── -->
+    <view class="head head--list">
+      <text class="head__mark">DB</text>
+      <text class="head__title">菜品库</text>
+      <text class="head__hint">{{ dishes.length }} / {{ meta.dishCount }}</text>
     </view>
 
-    <view v-if="loadingDishes" class="empty">加载中…</view>
+    <view v-if="loadingDishes" class="empty">读取中…</view>
     <view v-else-if="dishes.length === 0" class="empty">
       暂无菜品。请确认后端已启动并完成种子数据导入。
     </view>
+
     <view v-else class="dish-list">
       <view
         v-for="dish in dishes"
@@ -285,13 +305,13 @@ onShow(() => {
           <text class="dish__tag">{{ dish.spicyLabel }}</text>
           <text v-if="dish.calories" class="dish__tag">{{ dish.calories }} kcal</text>
           <text v-if="dish.hasRecipe" class="dish__tag dish__tag--recipe">
-            可自己做 {{ dish.cookMinutes }} 分钟
+            可自制 {{ dish.cookMinutes }}min
           </text>
         </view>
       </view>
     </view>
 
-    <view class="footer">美食伴侣 · M0 骨架</view>
+    <view class="footer">FOODMATE · M5 · NEON BUILD</view>
   </view>
 </template>
 
@@ -301,59 +321,117 @@ onShow(() => {
   padding-bottom: 60rpx;
 }
 
-/* ── 问候 ── */
-.hero {
-  padding: $fm-gap-md 8rpx $fm-gap-lg;
+/* ── 顶部状态栏 ───────────────────────────────────────────── */
+.sysbar {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  padding: 0 4rpx 8rpx;
+
+  &__dot {
+    font-size: 18rpx;
+
+    &--online {
+      color: $cy-lime;
+      text-shadow: 0 0 10rpx rgba(0, 255, 159, 0.8);
+    }
+
+    &--offline {
+      color: $cy-red;
+      text-shadow: 0 0 10rpx rgba(255, 59, 92, 0.8);
+    }
+
+    &--checking,
+    &--unknown {
+      color: $cy-amber;
+      animation: fm-pulse 1.2s ease-in-out infinite;
+    }
+  }
+
+  &__text {
+    @include hud-label($cy-text-faint);
+  }
+}
+
+/* ── 主视觉 ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: $fm-gap-md 4rpx $fm-gap-lg;
+  margin-bottom: $fm-gap-md;
+  overflow: hidden;
 
   &__greeting {
-    font-size: 30rpx;
-    color: $fm-text-secondary;
+    display: block;
+    @include hud-label($cy-cyan);
+    opacity: 0.75;
   }
 
-  &__prompt {
-    margin-top: 8rpx;
-    font-size: 44rpx;
-    font-weight: 700;
-    line-height: 1.35;
+  &__title {
+    display: block;
+    margin-top: 14rpx;
+    font-size: 52rpx;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: 1rpx;
+    color: $cy-text;
+    text-shadow:
+      0 0 18rpx rgba(0, 240, 255, 0.35),
+      2rpx 0 0 rgba(255, 46, 151, 0.35),
+      -2rpx 0 0 rgba(0, 240, 255, 0.35);
+    animation: fm-glitch 6s steps(1) infinite;
+  }
+
+  /* 扫描线覆盖，只有这一块有 */
+  &__scan {
+    position: absolute;
+    inset: 0;
+    @include scanlines(0.035);
+    pointer-events: none;
   }
 }
 
-/* ── 小节标题 ── */
-.section-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  display: block;
-  margin-bottom: $fm-gap-md;
-}
-
-.section-head {
+/* ── 区块标题 ─────────────────────────────────────────────── */
+.head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  gap: 14rpx;
+  margin-bottom: $fm-gap-md;
 
   &--list {
     margin: $fm-gap-lg 8rpx $fm-gap-md;
   }
 
-  .section-title {
-    margin-bottom: $fm-gap-md;
+  &__mark {
+    font-family: $cy-mono;
+    font-size: 20rpx;
+    font-weight: 700;
+    color: $cy-void;
+    background: $cy-cyan;
+    padding: 2rpx 10rpx;
+    box-shadow: 0 0 12rpx rgba(0, 240, 255, 0.5);
+  }
+
+  &__title {
+    font-size: 30rpx;
+    font-weight: 700;
+    letter-spacing: 2rpx;
+  }
+
+  &__value {
+    margin-left: auto;
+    @include neon-text($cy-cyan);
+    font-family: $cy-mono;
+    font-size: 28rpx;
+    font-weight: 700;
+  }
+
+  &__hint {
+    margin-left: auto;
+    @include hud-label();
   }
 }
 
-.section-value {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: $fm-primary;
-}
-
-.section-hint {
-  font-size: 24rpx;
-  color: $fm-text-tertiary;
-}
-
-/* ── 滑块 ── */
+/* ── 滑块 ─────────────────────────────────────────────────── */
 .slider-row {
   display: flex;
   align-items: center;
@@ -363,9 +441,8 @@ onShow(() => {
   }
 
   &__label {
-    width: 80rpx;
-    font-size: 26rpx;
-    color: $fm-text-secondary;
+    width: 70rpx;
+    @include hud-label();
   }
 
   &__slider {
@@ -374,67 +451,87 @@ onShow(() => {
   }
 }
 
-/* ── 连接状态 ── */
+/* ── CTA ──────────────────────────────────────────────────── */
+.cta {
+  margin-top: $fm-gap-lg;
+  height: 108rpx;
+  font-size: 34rpx;
+}
+
+/* ── 连接状态 ─────────────────────────────────────────────── */
 .status {
-  display: flex;
-  align-items: flex-start;
-  gap: $fm-gap-sm;
   margin-top: $fm-gap-lg;
   padding: $fm-gap-md $fm-gap-lg;
-  border-radius: $fm-radius-md;
-  background: $fm-bg-card;
+  background: $cy-surface;
+  border: 1px solid $cy-line;
+  border-left: 3px solid $cy-cyan;
 
-  &__dot {
-    font-size: 22rpx;
-    line-height: 1.8;
+  &--offline {
+    border-left-color: $cy-red;
   }
 
-  &__body {
-    flex: 1;
+  &--checking,
+  &--unknown {
+    border-left-color: $cy-amber;
+  }
+
+  &__row {
     display: flex;
-    flex-direction: column;
-  }
+    align-items: flex-start;
+    gap: $fm-gap-md;
 
-  &__title {
-    font-size: 28rpx;
-    font-weight: 600;
-  }
-
-  &__detail {
-    font-size: 22rpx;
-    color: $fm-text-tertiary;
-    word-break: break-all;
-
-    &--error {
-      color: $fm-danger;
+    & + & {
+      margin-top: 8rpx;
     }
   }
 
-  &--online &__dot {
-    color: $fm-success;
+  &__key {
+    width: 130rpx;
+    flex-shrink: 0;
+    @include hud-label();
   }
 
-  &--offline &__dot {
-    color: $fm-danger;
-  }
+  &__val {
+    flex: 1;
+    font-family: $cy-mono;
+    font-size: 22rpx;
+    color: $cy-text-dim;
+    word-break: break-all;
 
-  &--checking &__dot,
-  &--unknown &__dot {
-    color: $fm-warning;
+    &--ok {
+      color: $cy-lime;
+    }
+
+    &--err {
+      color: $cy-red;
+    }
   }
 }
 
-/* ── 菜品列表 ── */
+/* ── 菜品列表 ─────────────────────────────────────────────── */
 .dish-list {
   display: flex;
   flex-direction: column;
-  gap: $fm-gap-sm;
+  gap: 2rpx;
 }
 
 .dish {
-  background: $fm-bg-card;
-  border-radius: $fm-radius-md;
+  position: relative;
   padding: $fm-gap-md $fm-gap-lg;
+  background: $cy-surface;
+  border: 1px solid $cy-line;
+  transition: all 0.16s ease;
+
+  /* 左侧霓虹条：hover/点击时的"通电"感 */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 240, 255, 0.28);
+  }
 
   &__head {
     display: flex;
@@ -444,13 +541,15 @@ onShow(() => {
 
   &__name {
     font-size: 30rpx;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 1rpx;
   }
 
   &__price {
+    @include neon-text($cy-amber);
+    font-family: $cy-mono;
     font-size: 26rpx;
-    color: $fm-primary;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   &__meta {
@@ -461,15 +560,16 @@ onShow(() => {
   }
 
   &__tag {
-    font-size: 22rpx;
-    color: $fm-text-tertiary;
-    background: $fm-bg-muted;
-    border-radius: $fm-radius-sm;
-    padding: 4rpx 14rpx;
+    font-family: $cy-mono;
+    font-size: 20rpx;
+    color: $cy-text-faint;
+    border: 1px solid $cy-line;
+    padding: 2rpx 12rpx;
 
     &--recipe {
-      background: $fm-primary-soft;
-      color: $fm-primary;
+      color: $cy-cyan;
+      border-color: rgba(0, 240, 255, 0.4);
+      background: rgba(0, 240, 255, 0.06);
     }
   }
 }
@@ -477,14 +577,15 @@ onShow(() => {
 .empty {
   padding: 60rpx 0;
   text-align: center;
-  font-size: 26rpx;
-  color: $fm-text-tertiary;
+  font-family: $cy-mono;
+  font-size: 24rpx;
+  color: $cy-text-faint;
 }
 
 .footer {
   margin-top: $fm-gap-lg;
   text-align: center;
-  font-size: 22rpx;
-  color: $fm-text-tertiary;
+  @include hud-label($cy-text-faint);
+  opacity: 0.6;
 }
 </style>

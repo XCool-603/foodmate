@@ -255,8 +255,10 @@ onLoad(async () => {
 
     <!-- 推荐榜单 -->
     <view class="section-head">
-      <text class="section-title">为什么是这些</text>
-      <text class="section-hint">按分数排序</text>
+      <text class="section-title">
+        <text class="section-title__mark">▸</text>为什么是这些
+      </text>
+      <text class="section-hint">RANKED BY SCORE</text>
     </view>
 
     <view
@@ -279,7 +281,10 @@ onLoad(async () => {
       </view>
 
       <view class="reasons">
-        <text v-for="(reason, i) in item.reasons" :key="i" class="reason">{{ reason }}</text>
+        <view v-for="(reason, i) in item.reasons" :key="i" class="reason">
+          <text class="reason__mark">›</text>
+          <text class="reason__text">{{ reason }}</text>
+        </view>
       </view>
 
       <view v-if="item.penalties.length" class="penalties">
@@ -352,28 +357,40 @@ onLoad(async () => {
 
 .spin-button {
   margin-top: $fm-gap-lg;
-  padding: 22rpx 72rpx;
-  border-radius: 999rpx;
-  background: $fm-primary;
+  padding: 24rpx 80rpx;
+  background: linear-gradient(100deg, rgba(255, 46, 151, 0.2), rgba(0, 240, 255, 0.2));
+  border: 1px solid $cy-magenta;
   color: #fff;
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  text-shadow: 0 0 14rpx rgba(255, 46, 151, 0.8);
+  box-shadow:
+    0 0 18rpx rgba(255, 46, 151, 0.45),
+    inset 0 0 24rpx rgba(255, 46, 151, 0.12);
 
   &--disabled {
-    background: #d9dbe0;
+    background: $cy-surface-2;
+    border-color: $cy-line;
+    color: $cy-text-faint;
+    text-shadow: none;
+    box-shadow: none;
   }
 }
 
 .summary {
   margin-top: $fm-gap-md;
-  font-size: 22rpx;
-  color: $fm-text-tertiary;
+  font-family: $cy-mono;
+  font-size: 21rpx;
+  letter-spacing: 1rpx;
+  color: $cy-text-faint;
 }
 
 .relaxed {
-  margin-top: 6rpx;
-  font-size: 22rpx;
-  color: $fm-warning;
+  margin-top: 8rpx;
+  font-family: $cy-mono;
+  font-size: 21rpx;
+  color: $cy-amber;
 }
 
 /* ── 转盘结果卡 ── */
@@ -381,37 +398,49 @@ onLoad(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: $fm-primary-soft;
-  border-radius: $fm-radius-lg;
+  position: relative;
   padding: $fm-gap-lg;
   margin-bottom: $fm-gap-lg;
+  background:
+    linear-gradient(160deg, rgba(255, 46, 151, 0.14), rgba(0, 240, 255, 0.06) 60%),
+    $cy-surface;
+  border: 1px solid $cy-magenta;
+  box-shadow:
+    0 0 20rpx rgba(255, 46, 151, 0.3),
+    inset 0 0 40rpx rgba(255, 46, 151, 0.06);
 
   &__label {
-    font-size: 22rpx;
-    color: $fm-primary;
+    @include hud-label($cy-magenta);
   }
 
   &__name {
-    margin-top: 8rpx;
-    font-size: 44rpx;
-    font-weight: 700;
-    color: $fm-text;
+    margin-top: 10rpx;
+    font-size: 50rpx;
+    font-weight: 800;
+    letter-spacing: 2rpx;
+    color: $cy-text;
+    text-shadow:
+      0 0 20rpx rgba(255, 46, 151, 0.5),
+      2rpx 0 0 rgba(0, 240, 255, 0.4);
   }
 
   &__reason {
-    margin-top: 10rpx;
-    font-size: 26rpx;
-    color: $fm-text-secondary;
+    margin-top: 12rpx;
+    font-size: 25rpx;
+    color: $cy-text-dim;
     text-align: center;
+    line-height: 1.6;
   }
 
   &__button {
     padding: 20rpx 48rpx;
-    border-radius: 999rpx;
-    background: $fm-primary;
-    color: #fff;
+    background: rgba(0, 240, 255, 0.14);
+    border: 1px solid $cy-cyan;
+    color: $cy-cyan;
     font-size: 29rpx;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 2rpx;
+    box-shadow: 0 0 14rpx rgba(0, 240, 255, 0.3);
 
     &--ghost {
       background: transparent;
@@ -437,12 +466,21 @@ onLoad(async () => {
 
 .section-title {
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+
+  &__mark {
+    color: $cy-cyan;
+    text-shadow: 0 0 12rpx rgba(0, 240, 255, 0.8);
+    margin-right: 8rpx;
+  }
 }
 
 .section-hint {
-  font-size: 22rpx;
-  color: $fm-text-tertiary;
+  font-family: $cy-mono;
+  font-size: 19rpx;
+  letter-spacing: 1rpx;
+  color: $cy-text-faint;
 }
 
 /* ── 推荐项 ── */
@@ -464,12 +502,14 @@ onLoad(async () => {
   }
 
   &__rank {
-    width: 44rpx;
-    height: 44rpx;
-    border-radius: 50%;
-    background: $fm-bg-muted;
-    color: $fm-text-secondary;
+    width: 46rpx;
+    height: 46rpx;
+    background: $cy-surface-2;
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    color: $cy-cyan;
+    font-family: $cy-mono;
     font-size: 24rpx;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -484,19 +524,22 @@ onLoad(async () => {
 
   &__name {
     font-size: 30rpx;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 1rpx;
   }
 
   &__meta {
     margin-top: 4rpx;
-    font-size: 22rpx;
-    color: $fm-text-tertiary;
+    font-family: $cy-mono;
+    font-size: 20rpx;
+    color: $cy-text-faint;
   }
 
   &__score {
-    font-size: 34rpx;
-    font-weight: 700;
-    color: $fm-primary;
+    @include neon-text($cy-cyan);
+    font-family: $cy-mono;
+    font-size: 36rpx;
+    font-weight: 800;
   }
 
   &__actions {
@@ -509,14 +552,29 @@ onLoad(async () => {
 .reasons {
   display: flex;
   flex-direction: column;
-  margin-top: 10rpx;
-  gap: 4rpx;
+  margin-top: 12rpx;
+  gap: 6rpx;
 }
 
 .reason {
-  font-size: 25rpx;
-  color: $fm-text-secondary;
-  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+
+  &__mark {
+    font-family: $cy-mono;
+    font-size: 26rpx;
+    line-height: 1.5;
+    color: $cy-magenta;
+    text-shadow: 0 0 10rpx rgba(255, 46, 151, 0.7);
+  }
+
+  &__text {
+    flex: 1;
+    font-size: 25rpx;
+    line-height: 1.55;
+    color: $cy-text-dim;
+  }
 }
 
 .penalties {
@@ -555,42 +613,47 @@ onLoad(async () => {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  margin-bottom: 10rpx;
+  margin-bottom: 12rpx;
 
   &__label {
-    width: 130rpx;
-    font-size: 22rpx;
-    color: $fm-text-secondary;
+    width: 140rpx;
+    font-family: $cy-mono;
+    font-size: 20rpx;
+    color: $cy-text-faint;
     flex-shrink: 0;
   }
 
   &__track {
     flex: 1;
-    height: 14rpx;
-    border-radius: 999rpx;
-    background: $fm-bg-muted;
+    height: 12rpx;
+    background: $cy-surface-2;
+    border: 1px solid $cy-line;
     overflow: hidden;
   }
 
   &__fill {
     height: 100%;
-    border-radius: 999rpx;
-    background: $fm-primary;
+    background: linear-gradient(90deg, $cy-cyan, $cy-magenta);
+    box-shadow: 0 0 12rpx rgba(0, 240, 255, 0.7);
   }
 
   &__value {
-    width: 50rpx;
+    width: 56rpx;
     text-align: right;
-    font-size: 22rpx;
-    color: $fm-text-tertiary;
+    font-family: $cy-mono;
+    font-size: 21rpx;
+    font-weight: 700;
+    color: $cy-cyan;
   }
 }
 
 .breakdown__hint {
   display: block;
-  margin-top: 6rpx;
-  font-size: 20rpx;
-  color: $fm-text-tertiary;
+  margin-top: 10rpx;
+  font-family: $cy-mono;
+  font-size: 19rpx;
+  line-height: 1.6;
+  color: $cy-text-faint;
 }
 
 /* ── 其它 ── */

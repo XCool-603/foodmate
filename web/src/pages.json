@@ -23,7 +23,8 @@
       "path": "pages/records/index",
       "style": {
         "navigationBarTitleText": "我的记录",
-        "enablePullDownRefresh": true
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "light"
       }
     },
     {
@@ -58,15 +59,17 @@
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "black",
+    "navigationBarTextStyle": "white",
     "navigationBarTitleText": "美食伴侣",
-    "navigationBarBackgroundColor": "#FFFFFF",
-    "backgroundColor": "#F5F6F8"
+    "navigationBarBackgroundColor": "#08080F",
+    "backgroundColor": "#05050A",
+    "backgroundColorTop": "#05050A",
+    "backgroundColorBottom": "#05050A"
   },
   "tabBar": {
-    "color": "#9AA0A6",
-    "selectedColor": "#FF6B35",
-    "backgroundColor": "#FFFFFF",
+    "color": "#55556E",
+    "selectedColor": "#00F0FF",
+    "backgroundColor": "#0A0A12",
     "borderStyle": "black",
     "list": [
       {

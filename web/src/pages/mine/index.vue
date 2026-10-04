@@ -308,16 +308,20 @@ onShow(() => {
   }
 
   &__action {
-    font-size: 25rpx;
-    color: $fm-text-tertiary;
+    font-family: $cy-mono;
+    font-size: 23rpx;
+    letter-spacing: 1rpx;
+    color: $cy-text-dim;
     padding: 12rpx 28rpx;
-    border-radius: 999rpx;
-    background: $fm-bg-muted;
+    background: $cy-surface-2;
+    border: 1px solid $cy-line;
 
     &--primary {
-      background: $fm-primary;
-      color: #fff;
-      font-weight: 600;
+      background: rgba(0, 240, 255, 0.14);
+      border: 1px solid $cy-cyan;
+      color: $cy-cyan;
+      font-weight: 700;
+      box-shadow: 0 0 14rpx rgba(0, 240, 255, 0.3);
     }
   }
 }
@@ -432,24 +436,31 @@ onShow(() => {
 }
 
 .badge {
-  font-size: 22rpx;
-  padding: 6rpx 18rpx;
-  border-radius: 999rpx;
+  font-family: $cy-mono;
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  padding: 4rpx 16rpx;
+  border: 1px solid transparent;
 
   &--online {
-    background: rgba(48, 163, 108, 0.12);
-    color: $fm-success;
+    background: rgba(0, 255, 159, 0.1);
+    border-color: rgba(0, 255, 159, 0.4);
+    color: $cy-lime;
+    text-shadow: 0 0 10rpx rgba(0, 255, 159, 0.6);
   }
 
   &--offline {
-    background: rgba(229, 72, 77, 0.12);
-    color: $fm-danger;
+    background: rgba(255, 59, 92, 0.1);
+    border-color: rgba(255, 59, 92, 0.45);
+    color: $cy-red;
+    text-shadow: 0 0 10rpx rgba(255, 59, 92, 0.6);
   }
 
   &--checking,
   &--unknown {
-    background: rgba(245, 166, 35, 0.14);
-    color: $fm-warning;
+    background: rgba(255, 197, 61, 0.1);
+    border-color: rgba(255, 197, 61, 0.4);
+    color: $cy-amber;
   }
 }
 

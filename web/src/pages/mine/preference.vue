@@ -385,16 +385,21 @@ onShow(() => {
 
   &__apply {
     margin-top: $fm-gap-md;
-    padding: 18rpx;
+    padding: 20rpx;
     text-align: center;
-    border-radius: 999rpx;
-    background: $fm-primary;
-    color: #fff;
+    background: rgba(0, 240, 255, 0.14);
+    border: 1px solid $cy-cyan;
+    color: $cy-cyan;
     font-size: 27rpx;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 2rpx;
+    box-shadow: 0 0 16rpx rgba(0, 240, 255, 0.35);
 
     &--busy {
-      background: #d9dbe0;
+      background: $cy-surface-2;
+      border-color: $cy-line;
+      color: $cy-text-faint;
+      box-shadow: none;
     }
   }
 }
@@ -459,10 +464,11 @@ onShow(() => {
 
 .custom-tag {
   padding: 10rpx 24rpx;
-  border-radius: 999rpx;
-  background: rgba(229, 72, 77, 0.1);
-  color: $fm-danger;
-  font-size: 24rpx;
+  font-family: $cy-mono;
+  font-size: 23rpx;
+  background: rgba(255, 59, 92, 0.1);
+  border: 1px solid rgba(255, 59, 92, 0.4);
+  color: $cy-red;
 }
 
 .custom-input {
