@@ -403,6 +403,22 @@ dotnet test
     这也是 compose 里命名卷属主能对齐的前提 —— 命名卷首次创建时会连同
     镜像中该路径的属主一起复制，挂载点必须在镜像里就已存在且属主正确。
 
+23. **⚠️ 改了 `web/src/uni.scss` 必须重启 dev server** ——
+    uni-app 是把 `uni.scss` 的内容作为 `additionalData` **在构建配置阶段注入**
+    到每个 `<style lang="scss">` 里的。也就是说它是**编译配置的一部分，不是普通模块**：
+
+    - ✅ `npm run build:*` —— 每次都是新进程，会自动读到最新内容
+    - ❌ `npm run dev:*` —— 进程启动时就固定了，**HMR 不会重新注入**
+
+    症状很有迷惑性：构建能过，但 dev server 报
+    `[plugin:vite:css] [sass] Undefined variable`，
+    而且只在**新增**了变量的文件上报错（旧变量因为旧注入里还有，一切正常）。
+
+    本项目换赛博朋克主题时就踩了这个坑：`uni.scss` 新增了 `$cy-*` 变量，
+    但 dev server 注入的还是只有 `$fm-*` 的旧版本，于是 App.vue 全线报未定义。
+
+    **规则：动过 `uni.scss` 就重启 `npm run dev:*`。**
+
 ---
 
 ## 里程碑
