@@ -170,6 +170,7 @@ public sealed class DecisionService(
                 MealTimes = d.MealTimes,
                 Seasons = d.Seasons,
                 HasRecipe = d.Recipe is not null,
+                CanMakeAtHome = d.CanMakeAtHome,
                 CookMinutes = d.Recipe?.CookMinutes,
                 Popularity = d.Popularity,
                 IsBuiltin = d.IsBuiltin,

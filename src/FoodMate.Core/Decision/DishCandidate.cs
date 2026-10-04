@@ -32,8 +32,17 @@ public sealed record DishCandidate
 
     public SeasonMask Seasons { get; init; } = SeasonMask.AllYear;
 
-    /// <summary>是否有菜谱（「自己做」模式的硬性前提）。</summary>
+    /// <summary>是否有菜谱（「自己做」模式下更省事，会加分）。</summary>
     public bool HasRecipe { get; init; }
+
+    /// <summary>
+    /// 是否适合在家做。
+    /// </summary>
+    /// <remarks>
+    /// 「自己做」模式的硬过滤用这个，而不是 <see cref="HasRecipe"/> ——
+    /// 没有缓存菜谱不等于做不了，菜谱可以按需生成。
+    /// </remarks>
+    public bool CanMakeAtHome { get; init; } = true;
 
     /// <summary>烹饪时长（分钟）。</summary>
     public short? CookMinutes { get; init; }
@@ -48,7 +57,7 @@ public sealed record DishCandidate
     public double? DistanceKm { get; init; }
 
     /// <summary>该菜适合的就餐方式（用于「随便」模式下的偏好加权）。</summary>
-    public DiningMode PreferredDiningMode => HasRecipe ? DiningMode.Homemade : DiningMode.DineIn;
+    public DiningMode PreferredDiningMode => CanMakeAtHome ? DiningMode.Homemade : DiningMode.DineIn;
 
     /// <summary>参考价（分）。区间取中值；缺失时按分类兜底。</summary>
     public int ReferencePriceCents

@@ -200,7 +200,7 @@ public class DecisionServiceTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task 自己做模式应只返回有菜谱的菜()
+    public async Task 自己做模式应排除不能在家做的菜但保留没录菜谱的菜()
     {
         var user = await SeedUserAsync();
 
@@ -209,14 +209,19 @@ public class DecisionServiceTests : SqliteTestBase
             await SeedDishAsync($"可自制{i}", withRecipe: true);
         }
 
-        await SeedDishAsync("烤鸭", withRecipe: false);
+        // 没录菜谱但在家能做 → 保留（菜谱可以按需生成）
+        await SeedDishAsync("蒜蓉西兰花", withRecipe: false, canMakeAtHome: true);
+
+        // 家里真做不了 → 排除
+        await SeedDishAsync("佛跳墙", withRecipe: false, canMakeAtHome: false);
 
         var service = CreateService(Db);
         var outcome = await service.SuggestAsync(
             user.Id, LunchRequest(diningMode: (short)DiningMode.Homemade));
 
         Assert.Equal(0, outcome.Result.RelaxedLevel);
-        Assert.DoesNotContain(outcome.Result.Ranked, r => r.Name == "烤鸭");
+        Assert.Contains(outcome.Result.Ranked, r => r.Name == "蒜蓉西兰花");
+        Assert.DoesNotContain(outcome.Result.Ranked, r => r.Name == "佛跳墙");
     }
 
     [Fact]

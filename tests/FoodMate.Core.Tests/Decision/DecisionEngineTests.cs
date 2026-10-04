@@ -73,24 +73,33 @@ public class HardFilterTests
     }
 
     [Fact]
-    public void 自己做模式应排除没有菜谱的菜()
+    public void 自己做模式应排除不能在家做的菜但保留没录菜谱的菜()
     {
         // 有菜谱的菜足够多（≥ 转盘容量），因此不会触发降级
         var withRecipe = Enumerable.Range(0, 10)
             .Select(i => Build.Dish(name: $"可自制{i}", hasRecipe: true, cookMinutes: 15))
             .ToList();
 
-        var withoutRecipe = Build.Dish(name: "烤鸭", hasRecipe: false);
+        // 「没有缓存菜谱」不等于「做不了」—— 菜谱可以按需生成，所以不该被排除
+        var cookableNoRecipe = Build.Dish(name: "蒜蓉西兰花", hasRecipe: false, canMakeAtHome: true);
+
+        // 家里真做不了的才该被排除
+        var notCookable = Build.Dish(name: "佛跳墙", hasRecipe: false, canMakeAtHome: false);
 
         var ctx = Build.Context(
-            [.. withRecipe, withoutRecipe],
+            [.. withRecipe, cookableNoRecipe, notCookable],
             request: Build.Request(diningMode: DiningMode.Homemade));
 
         var result = Build.Engine().Decide(ctx);
 
         Assert.Equal(0, result.RelaxedLevel);
         Assert.Contains(result.Ranked, r => r.DishId == withRecipe[0].Id);
-        Assert.DoesNotContain(result.Ranked, r => r.DishId == withoutRecipe.Id);
+
+        // 没菜谱但在家能做 → 保留
+        Assert.Contains(result.Ranked, r => r.DishId == cookableNoRecipe.Id);
+
+        // 在家做不了 → 排除
+        Assert.DoesNotContain(result.Ranked, r => r.DishId == notCookable.Id);
     }
 
     [Fact]
@@ -419,12 +428,13 @@ public class DecisionEngineTests
             .Select(i => Build.Dish(name: $"有菜谱{i}", hasRecipe: true))
             .ToList();
 
-        var withoutRecipe = Enumerable.Range(0, 10)
-            .Select(i => Build.Dish(name: $"无菜谱{i}", hasRecipe: false))
+        // 只有 2 道能在家做 → 硬过滤后不足转盘容量 → 触发降级
+        var notCookable = Enumerable.Range(0, 10)
+            .Select(i => Build.Dish(name: $"餐厅专属{i}", canMakeAtHome: false))
             .ToList();
 
         var ctx = Build.Context(
-            [.. withRecipe, .. withoutRecipe],
+            [.. withRecipe, .. notCookable],
             request: Build.Request(diningMode: DiningMode.Homemade));
 
         var result = Build.Engine().Decide(ctx);

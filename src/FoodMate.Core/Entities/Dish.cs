@@ -52,6 +52,18 @@ public sealed class Dish
     /// <summary>全局热度 0–100，用于冷启动兜底排序。</summary>
     public int Popularity { get; set; }
 
+    /// <summary>
+    /// 是否适合在家做。
+    /// </summary>
+    /// <remarks>
+    /// 「自己做」模式的硬过滤用这个字段，<b>而不是</b>「有没有缓存菜谱」——
+    /// 两者是不同的事：
+    ///   · 佛跳墙、烤鸭 → 家里做不了，该排除
+    ///   · 蒜蓉西兰花 → 只是还没录菜谱，但随时可以按需生成，不该排除
+    /// 默认 true（绝大多数家常菜都能做），只把餐厅专属的菜标为 false。
+    /// </remarks>
+    public bool CanMakeAtHome { get; set; } = true;
+
     public bool IsActive { get; set; } = true;
 
     public bool IsDeleted { get; set; }

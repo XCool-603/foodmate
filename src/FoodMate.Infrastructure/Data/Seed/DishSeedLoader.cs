@@ -46,6 +46,12 @@ internal sealed class DishSeedItem
     /// </remarks>
     public string? ImageUrl { get; set; }
 
+    /// <summary>
+    /// 是否适合在家做。默认 true —— 绝大多数菜都能做，
+    /// 只把佛跳墙、烤鸭这类餐厅专属的标为 false。
+    /// </summary>
+    public bool CanMakeAtHome { get; set; } = true;
+
     public int Popularity { get; set; }
 
     public RecipeSeedItem? Recipe { get; set; }
@@ -66,9 +72,14 @@ internal sealed class RecipeSeedItem
 }
 
 /// <summary>从内嵌资源加载内置菜品种子数据。</summary>
+/// <remarks>
+/// 支持<b>多个</b>种子文件：凡是资源名里含 <c>dishes.seed</c> 且以 <c>.json</c> 结尾的都会被加载。
+/// 这样可以把「带完整菜谱的核心菜品」和「只含基础信息的扩充菜品」分开放，
+/// 各自文件保持在可人工维护的规模。
+/// </remarks>
 public static class DishSeedLoader
 {
-    private const string ResourceSuffix = "dishes.seed.json";
+    private const string ResourceMarker = "dishes.seed";
 
     private static readonly JsonSerializerOptions Options = new(JsonOpts.Default)
     {
@@ -81,20 +92,52 @@ public static class DishSeedLoader
     {
         var assembly = typeof(DishSeedLoader).Assembly;
 
-        var resourceName = Array.Find(
+        var resourceNames = Array.FindAll(
             assembly.GetManifestResourceNames(),
-            n => n.EndsWith(ResourceSuffix, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException(
-                $"找不到内嵌资源 {ResourceSuffix}，请检查 FoodMate.Infrastructure.csproj 的 EmbeddedResource 配置。");
+            n => n.Contains(ResourceMarker, StringComparison.OrdinalIgnoreCase)
+                 && n.EndsWith(".json", StringComparison.OrdinalIgnoreCase));
 
-        using var stream = assembly.GetManifestResourceStream(resourceName)
-            ?? throw new InvalidOperationException($"无法打开内嵌资源 {resourceName}。");
+        if (resourceNames.Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"找不到内嵌资源 {ResourceMarker}*.json，请检查 FoodMate.Infrastructure.csproj 的 EmbeddedResource 配置。");
+        }
 
-        var items = JsonSerializer.Deserialize<List<DishSeedItem>>(stream, Options) ?? [];
+        // 固定顺序，保证每次启动的导入顺序一致（便于排查问题）
+        Array.Sort(resourceNames, StringComparer.Ordinal);
+
+        var items = new List<DishSeedItem>();
+
+        foreach (var name in resourceNames)
+        {
+            using var stream = assembly.GetManifestResourceStream(name)
+                ?? throw new InvalidOperationException($"无法打开内嵌资源 {name}。");
+
+            var batch = JsonSerializer.Deserialize<List<DishSeedItem>>(stream, Options) ?? [];
+            items.AddRange(batch);
+        }
 
         var now = DateTimeOffset.UtcNow;
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var dishes = new List<Dish>(items.Count);
 
-        return [.. items.Select(item => MapToDish(item, now))];
+        foreach (var item in items)
+        {
+            if (string.IsNullOrWhiteSpace(item.Name))
+            {
+                continue;
+            }
+
+            // 同名菜品只保留先加载的那个 —— 后加载的文件可以覆盖式补充，但不会产生重复
+            if (!seen.Add(item.Name))
+            {
+                continue;
+            }
+
+            dishes.Add(MapToDish(item, now));
+        }
+
+        return dishes;
     }
 
     private static Dish MapToDish(DishSeedItem item, DateTimeOffset now)
@@ -116,6 +159,7 @@ public static class DishSeedLoader
             Seasons = item.Seasons,
             Description = item.Description,
             ImageUrl = item.ImageUrl,
+            CanMakeAtHome = item.CanMakeAtHome,
             Popularity = item.Popularity,
             IsBuiltin = true,
             OwnerUserId = null,

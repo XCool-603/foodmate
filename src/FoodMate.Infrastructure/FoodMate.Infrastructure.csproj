@@ -6,8 +6,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- 内置菜品种子数据以内嵌资源随程序集分发，避免部署时丢失文件 -->
-    <EmbeddedResource Include="Data\Seed\dishes.seed.json" />
+    <!--
+      内置菜品种子数据以内嵌资源随程序集分发，避免部署时丢失文件。
+      用通配符而不是逐个列举 —— 新增 dishes.seed.*.json 会自动被打包，
+      加载器会读取全部匹配的文件并按名称去重。
+    -->
+    <EmbeddedResource Include="Data\Seed\dishes.seed*.json" />
   </ItemGroup>
 
   <ItemGroup>

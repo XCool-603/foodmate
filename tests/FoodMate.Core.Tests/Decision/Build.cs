@@ -25,6 +25,7 @@ internal static class Build
         MealTimeMask mealTimes = MealTimeMask.All,
         SeasonMask seasons = SeasonMask.AllYear,
         bool hasRecipe = false,
+        bool canMakeAtHome = true,
         short? cookMinutes = null,
         int popularity = 50,
         double? distanceKm = null)
@@ -43,6 +44,7 @@ internal static class Build
             MealTimes = mealTimes,
             Seasons = seasons,
             HasRecipe = hasRecipe,
+            CanMakeAtHome = canMakeAtHome,
             CookMinutes = cookMinutes,
             Popularity = popularity,
             DistanceKm = distanceKm,

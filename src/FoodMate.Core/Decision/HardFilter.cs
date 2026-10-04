@@ -47,10 +47,13 @@ public static class HardFilter
                 continue;
             }
 
-            // F5：自己做模式必须有菜谱
+            // F5：自己做模式必须是在家做得了的菜。
+            // 判据是 CanMakeAtHome 而不是 HasRecipe ——
+            // 没有缓存菜谱不代表做不了（菜谱可以按需生成），
+            // 而佛跳墙这种是家里真做不了。
             if (enforceDiningMode
                 && diningMode == DiningMode.Homemade
-                && !dish.HasRecipe)
+                && !dish.CanMakeAtHome)
             {
                 continue;
             }
