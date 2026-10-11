@@ -35,11 +35,17 @@ page {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 
-  /* 技术网格底纹：极淡，只提供"这是块屏幕"的暗示 */
+  /* 技术网格 + 暗角：营造「透过一块屏幕在看」的质感 */
   background-image:
-    linear-gradient(rgba(0, 240, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.028) 1px, transparent 1px);
-  background-size: 44rpx 44rpx;
+    radial-gradient(ellipse at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 46, 151, 0.07) 0%, transparent 55%),
+    linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    44rpx 44rpx,
+    44rpx 44rpx;
 }
 
 /* ── 面板 ─────────────────────────────────────────────────── */
@@ -49,23 +55,40 @@ page {
   margin-bottom: $fm-gap-md;
   border-radius: $fm-radius-lg;
   background:
-    linear-gradient(150deg, rgba(0, 240, 255, 0.055) 0%, transparent 45%),
+    linear-gradient(150deg, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
     $cy-surface;
-  border: 1px solid $cy-line;
+
+  /* 带电边框：不是中性灰，而是暗青 */
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow:
+    0 0 16rpx rgba(0, 240, 255, 0.16),
+    inset 0 0 48rpx rgba(0, 240, 255, 0.06);
   overflow: hidden;
 
-  /* 右上角 L 形角标 —— 圆角面板上保留一点"仪器"感 */
+  /* 四角 HUD 框：像瞄准镜一样把内容框住 */
+  &::before,
   &::after {
     content: '';
     position: absolute;
-    top: 10rpx;
-    right: 10rpx;
-    width: 20rpx;
-    height: 20rpx;
-    border-top: 2px solid rgba(0, 240, 255, 0.55);
-    border-right: 2px solid rgba(0, 240, 255, 0.55);
-    border-top-right-radius: 8rpx;
+    width: 22rpx;
+    height: 22rpx;
     pointer-events: none;
+  }
+
+  &::before {
+    top: 10rpx;
+    left: 10rpx;
+    border-top: 2px solid rgba(0, 240, 255, 0.85);
+    border-left: 2px solid rgba(0, 240, 255, 0.85);
+    border-top-left-radius: 8rpx;
+  }
+
+  &::after {
+    bottom: 10rpx;
+    right: 10rpx;
+    border-bottom: 2px solid rgba(255, 46, 151, 0.75);
+    border-right: 2px solid rgba(255, 46, 151, 0.75);
+    border-bottom-right-radius: 8rpx;
   }
 }
 
@@ -81,7 +104,7 @@ page {
   padding: 12rpx 26rpx;
   border-radius: $fm-radius-pill;
   background: $cy-surface-2;
-  border: 1px solid $cy-line;
+  border: 1px solid rgba(0, 240, 255, 0.22);
   color: $cy-text-dim;
   font-size: 25rpx;
   font-family: $cy-mono;
@@ -89,13 +112,15 @@ page {
   transition: all 0.16s ease;
 
   &--active {
-    background: rgba(0, 240, 255, 0.12);
+    background: rgba(0, 240, 255, 0.16);
     border-color: $cy-cyan;
     color: $cy-cyan;
-    font-weight: 600;
+    font-weight: 700;
+    text-shadow: 0 0 10rpx rgba(0, 240, 255, 0.85);
     box-shadow:
-      0 0 12rpx rgba(0, 240, 255, 0.45),
-      inset 0 0 16rpx rgba(0, 240, 255, 0.14);
+      0 0 4rpx rgba(0, 240, 255, 0.9),
+      0 0 18rpx rgba(0, 240, 255, 0.5),
+      inset 0 0 20rpx rgba(0, 240, 255, 0.18);
   }
 }
 
@@ -107,17 +132,23 @@ page {
   justify-content: center;
   height: 96rpx;
   border-radius: $fm-radius-md;
-  background: linear-gradient(100deg, rgba(0, 240, 255, 0.16), rgba(255, 46, 151, 0.12));
+  background: linear-gradient(100deg, rgba(0, 240, 255, 0.22), rgba(255, 46, 151, 0.18));
   border: 1px solid $cy-cyan;
   color: $cy-cyan;
   font-size: 30rpx;
-  font-weight: 700;
-  letter-spacing: 3rpx;
-  text-shadow: 0 0 12rpx rgba(0, 240, 255, 0.6);
+  font-weight: 800;
+  letter-spacing: 4rpx;
+  text-shadow:
+    0 0 6rpx rgba(0, 240, 255, 0.95),
+    0 0 20rpx rgba(0, 240, 255, 0.6);
   box-shadow:
-    0 0 16rpx rgba(0, 240, 255, 0.35),
-    inset 0 0 24rpx rgba(0, 240, 255, 0.1);
+    0 0 4rpx rgba(0, 240, 255, 0.9),
+    0 0 20rpx rgba(0, 240, 255, 0.5),
+    0 0 46rpx rgba(0, 240, 255, 0.22),
+    inset 0 0 30rpx rgba(0, 240, 255, 0.14);
   overflow: hidden;
+  /* 霓虹管通电后的轻微呼吸 */
+  animation: fm-neon-breathe 2.6s ease-in-out infinite;
 
   /* 按钮内的斜向扫光 */
   &::before {
@@ -130,7 +161,7 @@ page {
     background: linear-gradient(
       100deg,
       transparent,
-      rgba(255, 255, 255, 0.22),
+      rgba(255, 255, 255, 0.3),
       transparent
     );
     animation: fm-sweep 3.4s ease-in-out infinite;
@@ -177,18 +208,27 @@ page {
   font-family: $cy-mono;
   font-weight: 700;
   color: $cy-cyan;
-  text-shadow: 0 0 12rpx rgba(0, 240, 255, 0.5);
+  text-shadow:
+    0 0 6rpx rgba(0, 240, 255, 0.95),
+    0 0 20rpx rgba(0, 240, 255, 0.55);
 }
 
-/* 细霓虹分隔线 */
+/* 信号失真文字：用于大标题 */
+.cy-glitch {
+  @include chromatic(2rpx);
+  animation: fm-signal-loss 5.5s steps(1) infinite;
+}
+
+/* 霓虹分隔线 */
 .cy-divider {
   height: 1px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(0, 240, 255, 0.4),
+    rgba(0, 240, 255, 0.8),
     transparent
   );
+  box-shadow: 0 0 12rpx rgba(0, 240, 255, 0.6);
   margin: $fm-gap-md 0;
 }
 
@@ -279,6 +319,50 @@ page {
   }
   50% {
     opacity: 0.5;
+  }
+}
+
+/* 霓虹管通电呼吸：亮度轻微起伏，模拟镇流器的抖动 */
+@keyframes fm-neon-breathe {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  48% {
+    filter: brightness(1.12);
+  }
+  52% {
+    filter: brightness(0.94);
+  }
+}
+
+/* 信号失真：偶发的 RGB 错位，赛博朋克标志性故障 */
+@keyframes fm-signal-loss {
+  0%,
+  88%,
+  100% {
+    text-shadow:
+      -2rpx 0 0 rgba(255, 46, 151, 0.75),
+      2rpx 0 0 rgba(0, 240, 255, 0.75);
+    transform: translate(0);
+  }
+  90% {
+    text-shadow:
+      -6rpx 0 0 rgba(255, 46, 151, 0.95),
+      6rpx 0 0 rgba(0, 240, 255, 0.95);
+    transform: translate(-2rpx, 1rpx);
+  }
+  92% {
+    text-shadow:
+      4rpx 0 0 rgba(255, 46, 151, 0.9),
+      -4rpx 0 0 rgba(0, 240, 255, 0.9);
+    transform: translate(2rpx, -1rpx);
+  }
+  94% {
+    text-shadow:
+      -2rpx 0 0 rgba(255, 46, 151, 0.75),
+      2rpx 0 0 rgba(0, 240, 255, 0.75);
+    transform: translate(0);
   }
 }
 

@@ -1,23 +1,29 @@
 /* ═══════════════════════════════════════════════════════════
- *  美食伴侣 · 赛博朋克主题
+ *  美食伴侣 · 赛博朋克主题（强化版）
  *
  *  设计概念：霓虹深夜食堂
  *  —— 深夜街边的霓虹面摊，潮湿的柏油路反射着招牌的光。
  *     冷色霓虹（青/品红）是环境，暖色（琥珀）留给食物本身。
  *
+ *  强化要点（相对初版）：
+ *    · 底色压得更深、霓虹提得更亮 —— 拉开对比，避免读成「深色模式」
+ *    · 分隔线改为**带电的青色**，而不是中性灰
+ *    · 霓虹发光普遍加强，并新增 RGB 分离（色差）与四角 HUD 框
+ *    · 全页扫描线 + 暗角，营造「透过屏幕看」的质感
+ *
  *  ⚠️ 保留 $fm-* 变量名（值全部替换为赛博朋克配色），
  *     这样所有页面无需改动即可换肤；新效果用 $cy-* 与 mixin。
  * ═══════════════════════════════════════════════════════════ */
 
-/* ── 背景层次 ─────────────────────────────────────────────── */
-$cy-void: #05050A;        // 最深：页面底色
-$cy-bg: #08080F;          // 页面
-$cy-surface: #0E0E18;     // 卡片
-$cy-surface-2: #14141F;   // 次级面（chip / 输入框）
-$cy-surface-3: #1B1B29;   // 悬浮态
-$cy-line: #22223A;        // 分隔线
+/* ── 背景层次（比初版更深）─────────────────────────────────── */
+$cy-void: #02020A;        // 最深：页面底色
+$cy-bg: #05050F;          // 页面
+$cy-surface: #0A0A18;     // 卡片
+$cy-surface-2: #101024;   // 次级面（chip / 输入框）
+$cy-surface-3: #181834;   // 悬浮态
+$cy-line: #1B3350;        // 分隔线：**带电的暗青**，不是中性灰
 
-/* ── 霓虹主色 ─────────────────────────────────────────────── */
+/* ── 霓虹主色（饱和度拉满）─────────────────────────────────── */
 $cy-cyan: #00F0FF;        // 主色：冷霓虹
 $cy-cyan-dim: #0A8F99;
 $cy-magenta: #FF2E97;     // 强调：品红霓虹
@@ -28,10 +34,10 @@ $cy-red: #FF3B5C;         // 危险
 $cy-violet: #A855F7;      // 次强调
 
 /* ── 文字 ─────────────────────────────────────────────────── */
-$cy-text: #E8E8F4;
-$cy-text-dim: #9A9AB8;
-$cy-text-faint: #55556E;
-$cy-text-void: #05050A;
+$cy-text: #EAF6FF;        // 带一点冷调的白，不是纯白
+$cy-text-dim: #8FA8C4;    // 次级文字也带冷调
+$cy-text-faint: #4A6480;
+$cy-text-void: #02020A;
 
 /* ── 等宽字体栈（数字与 HUD 标签用）───────────────────────── */
 $cy-mono: 'SF Mono', 'JetBrains Mono', Consolas, Monaco, 'Courier New', monospace;
@@ -40,8 +46,8 @@ $cy-mono: 'SF Mono', 'JetBrains Mono', Consolas, Monaco, 'Courier New', monospac
  *  兼容层：原有 $fm-* 变量指向新配色
  * ═══════════════════════════════════════════════════════════ */
 $fm-primary: $cy-cyan;
-$fm-primary-light: #5CF7FF;
-$fm-primary-soft: rgba(0, 240, 255, 0.12);
+$fm-primary-light: #7CFBFF;
+$fm-primary-soft: rgba(0, 240, 255, 0.14);
 
 $fm-text: $cy-text;
 $fm-text-secondary: $cy-text-dim;
@@ -71,44 +77,68 @@ $fm-gap-lg: 32rpx;
  *  Mixin
  * ═══════════════════════════════════════════════════════════ */
 
-/// 霓虹发光。三层叠加：贴近的亮边、外扩的光晕、向内的微光。
+/// 霓虹发光。四层叠加：贴边亮线、近处光晕、远处弥散、向内浸染。
 @mixin neon($color, $strength: 1) {
   box-shadow:
-    0 0 (6rpx * $strength) rgba($color, 0.55),
-    0 0 (20rpx * $strength) rgba($color, 0.22),
-    inset 0 0 (16rpx * $strength) rgba($color, 0.06);
+    0 0 (3rpx * $strength) rgba($color, 0.9),
+    0 0 (12rpx * $strength) rgba($color, 0.5),
+    0 0 (36rpx * $strength) rgba($color, 0.22),
+    inset 0 0 (20rpx * $strength) rgba($color, 0.1);
 }
 
-/// 文字霓虹。
+/// 文字霓虹（三层，最外层拉远形成弥散）。
 @mixin neon-text($color, $strength: 1) {
   color: $color;
   text-shadow:
-    0 0 (8rpx * $strength) rgba($color, 0.75),
-    0 0 (24rpx * $strength) rgba($color, 0.35);
+    0 0 (4rpx * $strength) rgba($color, 0.95),
+    0 0 (14rpx * $strength) rgba($color, 0.6),
+    0 0 (34rpx * $strength) rgba($color, 0.3);
 }
 
-/// 面板：暗底 + 细边 + 左上角霓虹标记。
+/// RGB 分离（色差）：青/品红左右偏移，赛博朋克标志性的"信号失真"。
+@mixin chromatic($offset: 2rpx) {
+  text-shadow:
+    -#{$offset} 0 0 rgba(255, 46, 151, 0.75),
+    #{$offset} 0 0 rgba(0, 240, 255, 0.75);
+}
+
+/// 面板：暗底 + **带电边框** + 内浸光。
 @mixin panel($accent: $cy-cyan) {
   position: relative;
   background:
-    linear-gradient(150deg, rgba($accent, 0.05) 0%, transparent 45%),
+    linear-gradient(150deg, rgba($accent, 0.07) 0%, transparent 45%),
     $cy-surface;
-  border: 1px solid $cy-line;
-  box-shadow: inset 0 0 40rpx rgba($accent, 0.04);
+  border: 1px solid rgba($accent, 0.28);
+  box-shadow:
+    0 0 14rpx rgba($accent, 0.14),
+    inset 0 0 44rpx rgba($accent, 0.06);
 }
 
-/// 面板的角标（用 ::after 画右上角的 L 形）。调用前需 position: relative。
-@mixin corner-mark($color: $cy-cyan, $size: 18rpx) {
+/// 四角 HUD 框：像瞄准镜一样把内容框住。调用前需 position: relative。
+@mixin hud-frame($color: $cy-cyan, $size: 22rpx, $width: 2px) {
+  &::before,
   &::after {
     content: '';
     position: absolute;
-    top: -1px;
-    right: -1px;
     width: $size;
     height: $size;
-    border-top: 2px solid $color;
-    border-right: 2px solid $color;
     pointer-events: none;
+  }
+
+  &::before {
+    top: 8rpx;
+    left: 8rpx;
+    border-top: $width solid $color;
+    border-left: $width solid $color;
+    border-top-left-radius: 8rpx;
+  }
+
+  &::after {
+    bottom: 8rpx;
+    right: 8rpx;
+    border-bottom: $width solid $color;
+    border-right: $width solid $color;
+    border-bottom-right-radius: 8rpx;
   }
 }
 
@@ -116,8 +146,8 @@ $fm-gap-lg: 32rpx;
 @mixin accent-bar($color: $cy-cyan, $width: 3px) {
   border-left: $width solid $color;
   box-shadow:
-    -#{$width} 0 (14rpx) rgba($color, 0.4),
-    inset 0 0 40rpx rgba($color, 0.04);
+    -#{$width} 0 (18rpx) rgba($color, 0.6),
+    inset 0 0 44rpx rgba($color, 0.06);
 }
 
 /// HUD 小标签：等宽、大写间距、暗色。
@@ -129,8 +159,8 @@ $fm-gap-lg: 32rpx;
   text-transform: uppercase;
 }
 
-/// 扫描线叠加（用在 hero 区块上）。
-@mixin scanlines($alpha: 0.04) {
+/// 扫描线叠加。默认比初版更明显。
+@mixin scanlines($alpha: 0.07) {
   background-image: repeating-linear-gradient(
     0deg,
     rgba(0, 240, 255, $alpha) 0px,
@@ -138,6 +168,14 @@ $fm-gap-lg: 32rpx;
     transparent 1px,
     transparent 4px
   );
+}
+
+/// 网格底纹。
+@mixin grid-bg($alpha: 0.05, $size: 44rpx) {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, $alpha) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, $alpha) 1px, transparent 1px);
+  background-size: $size $size;
 }
 
 /* ═══════════════════════════════════════════════════════════
