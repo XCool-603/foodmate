@@ -1,0 +1,30 @@
+=== isCommonAllergen coverage per file ===
+  dishes.seed.json             ingredients=53  explicit-flag=53  flag=true=16  dishes-with->=1-allergen=12
+  dishes.seed.more.json        ingredients=391  explicit-flag=111  flag=true=111  dishes-with->=1-allergen=81
+  dishes.seed.dessert.json     ingredients=147  explicit-flag=50  flag=true=50  dishes-with->=1-allergen=28
+  dishes.seed.drink.json       ingredients=111  explicit-flag=21  flag=true=21  dishes-with->=1-allergen=15
+  dishes.seed.more2.json       ingredients=244  explicit-flag=75  flag=true=75  dishes-with->=1-allergen=47
+  dishes.seed.recipes.json     ingredients=0  explicit-flag=0  flag=true=0  dishes-with->=1-allergen=0
+
+=== new-file dishes with NO allergen flagged, but ingredient name looks allergenic ===
+dishes with unflagged allergenic-looking ingredient: 7
+    ('dishes.seed.dessert.json', '杨枝甘露', [('椰浆', '椰')])
+    ('dishes.seed.dessert.json', '椰汁西米露', [('椰浆', '椰')])
+    ('dishes.seed.dessert.json', '芋圆', [('椰浆', '椰')])
+    ('dishes.seed.dessert.json', '芒果糯米饭', [('椰浆', '椰')])
+    ('dishes.seed.drink.json', '芒果冰沙', [('椰浆', '椰')])
+    ('dishes.seed.more2.json', '咖喱鱼蛋', [('椰浆', '椰')])
+    ('dishes.seed.more2.json', '泰式椰奶鸡汤', [('椰浆', '椰')])
+
+=== same scan over the pre-existing files ===
+pre-existing dishes with unflagged allergenic-looking ingredient: 10
+    ('dishes.seed.json', '清蒸鲈鱼', [('鲈鱼', '鱼')])
+    ('dishes.seed.json', '干炒牛河', [('河粉', '麸质')])
+    ('dishes.seed.json', '剁椒鱼头', [('胖头鱼头', '鱼')])
+    ('dishes.seed.more.json', '红烧茄子', [('生抽', '大豆')])
+    ('dishes.seed.more.json', '肠粉', [('生抽', '大豆')])
+    ('dishes.seed.more.json', '火腿炖甲鱼', [('甲鱼', '鱼')])
+    ('dishes.seed.more.json', '泰式冬阴功', [('椰浆', '椰')])
+    ('dishes.seed.more.json', '越南河粉', [('河粉', '麸质')])
+    ('dishes.seed.more.json', '泰式炒河粉', [('河粉', '麸质')])
+    ('dishes.seed.more.json', '咖喱蟹', [('椰浆', '椰')])

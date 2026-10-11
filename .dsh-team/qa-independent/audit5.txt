@@ -1,0 +1,65 @@
+=== mealTimes / seasons mask ranges (valid: meal 0..15, season 0..15) ===
+value types: {('mt', 'int'): 77, ('ss', 'int'): 58, ('ss', 'str'): 14}
+mealTimes values: [(1, 15), (3, 15), (6, 23), (11, 1), (12, 15), (14, 2), (15, 6)]
+seasons values: [(0, 19), (1, 4), (2, 23), (4, 7), (8, 18), (12, 1)]
+out of range: []
+
+=== imageUrl / canMakeAtHome ===
+imageUrl set count: 0 []
+canMakeAtHome by file: {('dishes.seed.more.json', False): 10}
+canMakeAtHome=false: [('dishes.seed.more.json', '烧鹅'), ('dishes.seed.more.json', '葱烧海参'), ('dishes.seed.more.json', '松鼠鳜鱼'), ('dishes.seed.more.json', '蟹粉小笼'), ('dishes.seed.more.json', '响油鳝糊'), ('dishes.seed.more.json', '佛跳墙'), ('dishes.seed.more.json', '臭鳜鱼'), ('dishes.seed.more.json', '火腿炖甲鱼'), ('dishes.seed.more.json', '三文鱼刺身'), ('dishes.seed.more.json', '寿司拼盘')]
+
+=== aliases ===
+dishes without aliases: 404
+alias dup within dish: []
+alias == own name: []
+alias collides with another dish name: [('dishes.seed.json', '农家小炒肉', '辣椒炒肉'), ('dishes.seed.json', '红烧肉', '东坡肉')]
+
+=== tags ===
+dishes without tags: []
+distinct tags: 252 top: [('下饭', 39), ('清淡', 29), ('早餐', 28), ('快手', 25), ('经典', 23), ('鲜', 21), ('小吃', 21), ('家常', 19), ('暖胃', 17), ('重口', 17), ('低卡', 17), ('宴客', 16), ('酸甜', 16), ('汤水', 16), ('麻辣', 14)]
+tags used once: 123
+
+=== sample content of new dishes (10 random-ish picks) ===
+  [dishes.seed.drink.json] 西湖龙井  cuisine=Zhejiang category=Drink spicy=0 price=1200-3000 cal=3 pop=80
+      ingredients: 龙井茶叶 5g; 山泉水 300ml
+      tags: ['清香', '茶道', '解腻'] | desc: None
+  [dishes.seed.drink.json] 珍珠奶茶  cuisine=Other category=Drink spicy=0 price=1200-2200 cal=380 pop=93
+      ingredients: 红茶 10g; 牛奶 200ml; 木薯珍珠 60g; 黑糖 20g
+      tags: ['台式', '嚼劲', '甜香'] | desc: None
+  [dishes.seed.recipes.json] 珍珠奶茶  cuisine=None category=None spicy=None price=None-None cal=None pop=None
+      ingredients: 
+      tags: None | desc: None
+      recipe steps=5: 木薯珍珠下沸水煮 20 分钟，其间搅拌防粘 || 关火焖 15 分钟至完全透明，捞出过冷水 || 珍珠拌入红糖浆浸泡 10 分钟入味 || 红茶包用热水泡 5 分钟，取出茶包，加糖搅匀 || 杯中放珍珠，倒入红茶，加牛奶和冰块
+  [dishes.seed.dessert.json] 杨枝甘露  cuisine=Cantonese category=Dessert spicy=0 price=1800-2800 cal=320 pop=88
+      ingredients: 芒果 2个; 西柚 半个; 西米 50g; 椰浆 150ml
+      tags: ['港式', '冰爽', '果香'] | desc: None
+  [dishes.seed.recipes.json] 杨枝甘露  cuisine=None category=None spicy=None price=None-None cal=None pop=None
+      ingredients: 
+      tags: None | desc: None
+      recipe steps=6: 西米下沸水煮 10 分钟，关火焖 5 分钟至透明，捞出过冰水 || 芒果去皮，一半打成泥，一半切小丁 || 西柚剥出果肉，撕成小瓣 || 芒果泥加椰浆、淡奶油和糖搅匀 || 碗中放西米，倒入芒果椰浆，铺上芒果丁和西柚粒 || 冷藏 30 分钟风味更佳
+  [dishes.seed.dessert.json] 马卡龙  cuisine=Western category=Dessert spicy=0 price=3600-5800 cal=380 pop=80
+      ingredients: 杏仁粉 100g; 蛋白 3个; 糖粉 150g; 食用色素 适量
+      tags: ['法式', '精致', '下午茶'] | desc: None
+  [dishes.seed.dessert.json] 提拉米苏  cuisine=Western category=Dessert spicy=0 price=2800-4200 cal=420 pop=90
+      ingredients: 马斯卡彭芝士 250g; 手指饼干 100g; 鸡蛋 3个; 浓缩咖啡 100ml
+      tags: ['意式', '咖啡香', '约会'] | desc: None
+  [dishes.seed.recipes.json] 提拉米苏  cuisine=None category=None spicy=None price=None-None cal=None pop=None
+      ingredients: 
+      tags: None | desc: None
+      recipe steps=6: 蛋黄加糖隔水加热打发至颜色变浅、体积膨大 || 加马斯卡彭芝士搅至顺滑，再拌入打发至七分的淡奶油 || 浓缩咖啡加朗姆酒和糖调匀，手指饼干快速蘸一下，不要泡软 || 容器底部铺一层蘸过咖啡的饼干，抹一层芝士糊 || 重复叠一层，表面抹平，冷藏至少 4 小时 || 食用前筛一层可可粉，切块
+  [dishes.seed.more.json] 佛跳墙  cuisine=Fujian category=Soup spicy=0 price=18800-28800 cal=680 pop=76
+      ingredients: 鲍鱼 4只; 海参 2只; 花胶 50g; 老母鸡 半只
+      tags: ['高档', '宴客', '滋补'] | desc: None
+  [dishes.seed.more2.json] 肉燕  cuisine=Fujian category=Snack spicy=0 price=1200-2000 cal=320 pop=74
+      ingredients: 肉燕皮 20张; 猪肉馅 150g; 虾油 适量
+      tags: ['福州', '小吃', '汤食'] | desc: None
+  [dishes.seed.dessert.json] 三大炮  cuisine=Sichuan category=Dessert spicy=0 price=1000-1600 cal=320 pop=75
+      ingredients: 糯米 250g; 红糖 60g; 黄豆面 60g; 芝麻 15g
+      tags: ['成都', '街头', '表演'] | desc: None
+  [dishes.seed.more2.json] 钵钵鸡  cuisine=Sichuan category=Snack spicy=4 price=2000-3500 cal=380 pop=82
+      ingredients: 鸡腿肉 200g; 藕片 100g; 红油 3勺; 白芝麻 适量
+      tags: ['四川', '麻辣', '冷食'] | desc: None
+  [dishes.seed.more2.json] 班尼迪克蛋  cuisine=Western category=Breakfast spicy=0 price=3200-4600 cal=520 pop=74
+      ingredients: 英式松饼 1个; 鸡蛋 2个; 培根 2片; 荷兰酱 适量
+      tags: ['西式', '早午餐', '精致'] | desc: None

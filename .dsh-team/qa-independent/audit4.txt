@@ -1,0 +1,18 @@
+list dump dishes: 301
+db dump dishes: 301
+db unique names: 301
+in seed but not in DB: []
+in DB but not in seed: []
+new-file dish count: 145 unique: 145
+new dishes missing from DB: []
+pre-existing dish count: 156 unique: 156
+pre-existing dishes missing from DB: []
+recipes.json names: 118
+recipes.json names without recipe in DB: []
+DB dishes with recipe NOT from recipes.json: ['番茄牛腩', '番茄鸡蛋面', '皮蛋瘦肉粥', '蛋炒饭', '西红柿炒蛋', '青椒土豆丝']
+
+=== field-by-field: simulated merge vs live DB (145 new dishes) ===
+field mismatches: 0
+
+=== whole-seed vs DB mismatches (301 dishes): 0
+recipe step-count mismatches: 0 []

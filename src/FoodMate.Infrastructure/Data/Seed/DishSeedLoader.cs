@@ -118,8 +118,11 @@ public static class DishSeedLoader
         }
 
         var now = DateTimeOffset.UtcNow;
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var dishes = new List<Dish>(items.Count);
+
+        // 按菜名合并，而不是「先到先得丢弃」——
+        // 这样「基础信息」和「菜谱」可以分文件维护，多个文件也能并行产出而互不冲突。
+        var byName = new Dictionary<string, DishSeedItem>(StringComparer.OrdinalIgnoreCase);
+        var order = new List<string>(items.Count);
 
         foreach (var item in items)
         {
@@ -128,17 +131,68 @@ public static class DishSeedLoader
                 continue;
             }
 
-            // 同名菜品只保留先加载的那个 —— 后加载的文件可以覆盖式补充，但不会产生重复
-            if (!seen.Add(item.Name))
+            if (!byName.TryGetValue(item.Name, out var existing))
             {
+                byName[item.Name] = item;
+                order.Add(item.Name);
                 continue;
             }
 
-            dishes.Add(MapToDish(item, now));
+            // 同名合并策略：**菜谱允许后加载的覆盖，其余字段只补空缺**。
+            //
+            // 为什么菜谱要特殊对待：`dishes.seed.recipes.json` 排在资源序最后，
+            // 它的存在意义就是「补齐并修正」已有菜谱（例如把只有 2 步的菜谱补到 3 步）。
+            // 若也用 ??=，它永远覆盖不掉先加载文件里的旧菜谱，整条工作流就是白干。
+            // 其余字段（价格、热量、食材等）仍保持「只补空缺」，避免补充文件
+            // 无意中改掉基础数据。
+            if (item.Recipe is not null)
+            {
+                existing.Recipe = item.Recipe;
+            }
+
+            existing.Description ??= item.Description;
+            existing.ImageUrl ??= item.ImageUrl;
+            existing.PriceMinCents ??= item.PriceMinCents;
+            existing.PriceMaxCents ??= item.PriceMaxCents;
+            existing.Calories ??= item.Calories;
+
+            if (existing.Aliases.Count == 0) existing.Aliases = item.Aliases;
+            if (existing.Tags.Count == 0) existing.Tags = item.Tags;
+            if (existing.Ingredients.Count == 0) existing.Ingredients = item.Ingredients;
         }
 
-        return dishes;
+        // 拦掉「孤儿补充项」：只写了菜谱、没有任何基础信息的条目，
+        // 如果它的菜名从未命中任何基础定义，那几乎一定是**菜名打错**。
+        //
+        // 为什么必须拦：`MapToDish` 会把它落成一道
+        // 「Cuisine=Other / Category=Unknown / 无食材 / 无价格」的空菜品。
+        // 更糟的是菜品总数会因此**变大**，让「≥300 道」这类指标看起来更达标，
+        // 错误被完全掩盖。宁可启动就失败，也不要悄悄污染菜品库。
+        var orphanRecipes = order
+            .Where(name => IsSupplementOnly(byName[name]))
+            .ToList();
+
+        if (orphanRecipes.Count > 0)
+        {
+            throw new InvalidOperationException(
+                "种子文件里有菜谱补充项的菜名在菜品库中不存在，请检查是否拼写错误：" +
+                string.Join("、", orphanRecipes));
+        }
+
+        return [.. order.Select(name => MapToDish(byName[name], now))];
     }
+
+    /// <summary>
+    /// 是否是「只补菜谱」的条目 —— 有菜谱，但没有任何基础信息。
+    /// </summary>
+    /// <remarks>
+    /// 判据用「食材为空且热度为 0」：所有真实菜品定义都至少有 2 项食材，
+    /// 而补充文件按约定只写 <c>name</c> + <c>recipe</c>。
+    /// </remarks>
+    private static bool IsSupplementOnly(DishSeedItem item) =>
+        item.Recipe is not null
+        && item.Ingredients.Count == 0
+        && item.Popularity == 0;
 
     private static Dish MapToDish(DishSeedItem item, DateTimeOffset now)
     {

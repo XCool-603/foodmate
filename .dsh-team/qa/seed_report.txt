@@ -1,0 +1,211 @@
+==============================================================================
+A. RAW PER-FILE COUNTS  (delivered claim in parentheses)
+==============================================================================
+  dishes.seed.json               raw=  20
+  dishes.seed.more.json          raw= 136
+  dishes.seed.dessert.json       raw=  40  MATCH   <-- new-batch claim 40
+  dishes.seed.drink.json         raw=  35  MATCH   <-- new-batch claim 35
+  dishes.seed.more2.json         raw=  70  MATCH   <-- new-batch claim 70
+  dishes.seed.recipes.json       raw= 118
+
+==============================================================================
+B. DUPLICATE NAMES
+==============================================================================
+  dishes.seed.json               intra-file dups: NONE
+  dishes.seed.more.json          intra-file dups: NONE
+  dishes.seed.dessert.json       intra-file dups: NONE
+  dishes.seed.drink.json         intra-file dups: NONE
+  dishes.seed.more2.json         intra-file dups: NONE
+  dishes.seed.recipes.json       intra-file dups: NONE
+  cross-file shared names: 118
+  shared names NOT involving recipes.json: 118
+     *** 上汤娃娃菜 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 五谷豆浆 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 冬瓜排骨汤 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 冰粉 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 冰糖炖雪梨 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 冰糖雪梨汁 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 凉拌木耳 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 凉拌黄瓜 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 凯撒沙拉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 双皮奶 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 可乐鸡翅 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 台式卤肉饭 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 回锅肉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 土豆炖牛肉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 地三鲜 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 姜撞奶 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 宫保鸡丁 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 家常豆腐 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 小笼包 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 小米南瓜粥 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 小鸡炖蘑菇 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 山药排骨汤 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 干煸四季豆 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 干锅花菜 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 手抓饼 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 手撕包菜 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 扬州炒饭 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 担担面 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 提拉米苏 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 新疆大盘鸡 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 日式咖喱饭 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 春卷 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 杨枝甘露 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 柠檬蜂蜜水 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 桂圆红枣茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 桂花糕 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 椰汁西米露 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 水煮牛肉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 汤圆 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 泰式冬阴功 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 海南鸡饭 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 清蒸鲈鱼 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 港式丝袜奶茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 港式冻柠茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 火腿芝士三明治 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 炸酱面 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 烧仙草 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 热可可 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 热干面 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 焦糖布丁 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 焦糖玛奇朵 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 煎饼果子 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 煲仔饭 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 狼牙土豆 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 玛格丽特披萨 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 珍珠奶茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 甘蔗汁 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 生椰拿铁 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 生煎包 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 番茄炒菜花 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 白切鸡 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 白灼虾 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 皮蛋豆腐 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 石锅拌饭 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 糖醋排骨 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 紫菜蛋花汤 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 红烧肉 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 红烧茄子 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 红糖姜茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 红糖糍粑 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 红豆沙 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 美式咖啡 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 美式松饼 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 肉夹馍 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 肉酱意面 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 肠粉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 芋圆 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 芋泥啵啵奶茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 芒果冰沙 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 芒果班戟 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 芒果糯米饭 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 芝麻糊 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 花生汤 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 草莓奶昔 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 莲藕排骨汤 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 菌菇鸡汤 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 菠萝咕咾肉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 葡式蛋挞 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 葱油拌面 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 葱油饼 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 蒜蓉西兰花 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 蚝油生菜 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 蜂蜜柚子茶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 蜜汁叉烧 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 螺蛳粉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 西湖牛肉羹 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 西瓜汁 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 西红柿鸡蛋汤 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 豆腐脑 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 过桥米线 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 酒酿圆子 <- ['dishes.seed.dessert.json', 'dishes.seed.recipes.json']
+     *** 酸梅汤 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 酸菜鱼 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 酸辣汤 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 银耳莲子羹 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 锅包肉 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 阳春面 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 韩式炸鸡 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 韭菜炒鸡蛋 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 香菇油菜 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 香蕉牛奶 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 鱼香肉丝 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 鲜榨橙汁 <- ['dishes.seed.drink.json', 'dishes.seed.recipes.json']
+     *** 鲫鱼豆腐汤 <- ['dishes.seed.more2.json', 'dishes.seed.recipes.json']
+     *** 麻婆豆腐 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 麻辣烫 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+     *** 麻辣香锅 <- ['dishes.seed.json', 'dishes.seed.recipes.json']
+     *** 黑椒牛排 <- ['dishes.seed.more.json', 'dishes.seed.recipes.json']
+  (all others are the intended dish<->recipe pairing with dishes.seed.recipes.json)
+
+==============================================================================
+C. MERGE CONFLICTS (only where >=2 files EXPLICITLY set the field)
+==============================================================================
+  NONE - no file tries to override cuisine/category/spicyLevel/mealTimes/seasons/
+         canMakeAtHome/popularity of a dish already defined earlier.
+  Note: dishes.seed.recipes.json carries ONLY name+recipe, so it never conflicts.
+
+==============================================================================
+D. MERGED SIMULATION (mirrors DishSeedLoader.cs)
+==============================================================================
+  raw rows total      = 419
+  MERGED UNIQUE DISHES= 301      (health/ready reported 301)
+  rows collapsed      = 118
+
+==============================================================================
+E. C7 FIELD COMPLETENESS for the 145 NEW dishes
+==============================================================================
+  dishes.seed.dessert.json (n=40)
+     missing required fields : 0
+     ingredients.length < 2  : 0
+  dishes.seed.drink.json (n=35)
+     missing required fields : 0
+     ingredients.length < 2  : 0
+  dishes.seed.more2.json (n=70)
+     missing required fields : 0
+     ingredients.length < 2  : 0
+
+==============================================================================
+F. ENUM LEGALITY (all 6 files)
+==============================================================================
+  dishes.seed.json               bad cuisine=20 bad category=20
+     *** cuisine (1, '番茄牛腩', 1)
+     *** cuisine (2, '宫保鸡丁', 1)
+     *** cuisine (3, '麻婆豆腐', 1)
+     *** cuisine (4, '白切鸡', 2)
+     *** cuisine (5, '清蒸鲈鱼', 2)
+     *** cuisine (6, '干炒牛河', 2)
+     *** cuisine (7, '剁椒鱼头', 3)
+     *** cuisine (8, '农家小炒肉', 3)
+     *** cuisine (9, '西红柿炒蛋', 0)
+     *** cuisine (10, '青椒土豆丝', 0)
+     *** category (1, '番茄牛腩', 2)
+     *** category (2, '宫保鸡丁', 2)
+     *** category (3, '麻婆豆腐', 3)
+     *** category (4, '白切鸡', 2)
+     *** category (5, '清蒸鲈鱼', 2)
+     *** category (6, '干炒牛河', 1)
+     *** category (7, '剁椒鱼头', 2)
+     *** category (8, '农家小炒肉', 2)
+     *** category (9, '西红柿炒蛋', 3)
+     *** category (10, '青椒土豆丝', 3)
+  dishes.seed.more.json          bad cuisine=0 bad category=0
+  dishes.seed.dessert.json       bad cuisine=0 bad category=0
+  dishes.seed.drink.json         bad cuisine=0 bad category=0
+  dishes.seed.more2.json         bad cuisine=0 bad category=0
+  dishes.seed.recipes.json       bad cuisine=0 bad category=0
+
+==============================================================================
+G. DATA QUALITY SCAN (all files, pre-merge)
+==============================================================================
+  recipe with <3 steps: 1
+     *** ('dishes.seed.json', 18, '凉拌黄瓜', 2)
+
+==============================================================================
+H. RECIPE COVERAGE in seed (post-merge)
+==============================================================================
+  dishes with a recipe (merged): 124
+  min steps=3  max steps=8
+  recipes with <3 steps: []
+  step-count histogram: {3: 4, 4: 25, 5: 38, 6: 42, 7: 14, 8: 1}

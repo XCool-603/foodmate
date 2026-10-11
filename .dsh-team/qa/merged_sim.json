@@ -1,0 +1,780 @@
+{
+ "merged_count": 301,
+ "order": [
+  "杨枝甘露",
+  "双皮奶",
+  "姜撞奶",
+  "芒果班戟",
+  "红豆沙",
+  "芝麻糊",
+  "椰汁西米露",
+  "葡式蛋挞",
+  "榴莲酥",
+  "糖不甩",
+  "拔丝地瓜",
+  "冰糖炖雪梨",
+  "桂花糖藕",
+  "酒酿圆子",
+  "梅花糕",
+  "定胜糕",
+  "桂花糕",
+  "青团",
+  "驴打滚",
+  "豌豆黄",
+  "艾窝窝",
+  "汤圆",
+  "冰粉",
+  "红糖糍粑",
+  "三大炮",
+  "蛋烘糕",
+  "甑糕",
+  "切糕",
+  "芋圆",
+  "烧仙草",
+  "花生汤",
+  "提拉米苏",
+  "芝士蛋糕",
+  "熔岩巧克力蛋糕",
+  "焦糖布丁",
+  "马卡龙",
+  "抹茶大福",
+  "铜锣烧",
+  "韩式刨冰",
+  "芒果糯米饭",
+  "酸梅汤",
+  "柠檬蜂蜜水",
+  "红糖姜茶",
+  "冰糖雪梨汁",
+  "桂圆红枣茶",
+  "菊花茶",
+  "茉莉花茶",
+  "西湖龙井",
+  "铁观音",
+  "普洱茶",
+  "大麦茶",
+  "冬瓜茶",
+  "港式丝袜奶茶",
+  "鸳鸯奶茶",
+  "港式冻柠茶",
+  "珍珠奶茶",
+  "芋泥啵啵奶茶",
+  "美式咖啡",
+  "卡布奇诺",
+  "生椰拿铁",
+  "焦糖玛奇朵",
+  "摩卡咖啡",
+  "抹茶拿铁",
+  "鲜榨橙汁",
+  "西瓜汁",
+  "甘蔗汁",
+  "芒果冰沙",
+  "椰子水",
+  "草莓奶昔",
+  "香蕉牛奶",
+  "热可可",
+  "蜂蜜柚子茶",
+  "印度拉茶",
+  "泰式手标奶茶",
+  "五谷豆浆",
+  "番茄牛腩",
+  "宫保鸡丁",
+  "麻婆豆腐",
+  "白切鸡",
+  "清蒸鲈鱼",
+  "干炒牛河",
+  "剁椒鱼头",
+  "农家小炒肉",
+  "西红柿炒蛋",
+  "青椒土豆丝",
+  "蛋炒饭",
+  "红烧肉",
+  "豆浆油条",
+  "小笼包",
+  "皮蛋瘦肉粥",
+  "麻辣香锅",
+  "番茄鸡蛋面",
+  "凉拌黄瓜",
+  "酸辣汤",
+  "银耳莲子羹",
+  "可乐鸡翅",
+  "糖醋排骨",
+  "红烧茄子",
+  "蒜蓉西兰花",
+  "干煸四季豆",
+  "土豆炖牛肉",
+  "香菇滑鸡",
+  "冬瓜排骨汤",
+  "紫菜蛋花汤",
+  "玉米排骨汤",
+  "手撕包菜",
+  "醋溜白菜",
+  "番茄炒菜花",
+  "蚝油生菜",
+  "韭菜炒鸡蛋",
+  "洋葱炒蛋",
+  "家常豆腐",
+  "白菜炖粉条",
+  "鱼香肉丝",
+  "回锅肉",
+  "水煮牛肉",
+  "水煮鱼",
+  "夫妻肺片",
+  "口水鸡",
+  "辣子鸡",
+  "毛血旺",
+  "蒜泥白肉",
+  "酸菜鱼",
+  "担担面",
+  "红油抄手",
+  "蜜汁叉烧",
+  "烧鹅",
+  "虾饺",
+  "肠粉",
+  "煲仔饭",
+  "老火靓汤",
+  "白灼虾",
+  "豉汁蒸排骨",
+  "菠萝咕咾肉",
+  "蜜汁叉烧包",
+  "小炒黄牛肉",
+  "毛氏红烧肉",
+  "口味虾",
+  "辣椒炒肉",
+  "湘西外婆菜",
+  "擂辣椒皮蛋",
+  "酸豆角肉末",
+  "湘式蒸腊肉",
+  "葱烧海参",
+  "九转大肠",
+  "糖醋鲤鱼",
+  "爆炒腰花",
+  "油焖大虾",
+  "四喜丸子",
+  "松鼠鳜鱼",
+  "狮子头",
+  "盐水鸭",
+  "蟹粉小笼",
+  "大煮干丝",
+  "响油鳝糊",
+  "东坡肉",
+  "西湖醋鱼",
+  "龙井虾仁",
+  "叫花鸡",
+  "宋嫂鱼羹",
+  "片儿川",
+  "佛跳墙",
+  "沙茶面",
+  "荔枝肉",
+  "海蛎煎",
+  "臭鳜鱼",
+  "毛豆腐",
+  "火腿炖甲鱼",
+  "锅包肉",
+  "猪肉炖粉条",
+  "地三鲜",
+  "小鸡炖蘑菇",
+  "溜肉段",
+  "酸菜白肉",
+  "东北大拉皮",
+  "杀猪菜",
+  "兰州牛肉面",
+  "羊肉泡馍",
+  "肉夹馍",
+  "手抓羊肉",
+  "新疆大盘鸡",
+  "烤羊肉串",
+  "臊子面",
+  "过桥米线",
+  "汽锅鸡",
+  "酸汤鱼",
+  "折耳根炒腊肉",
+  "菌子火锅",
+  "丝娃娃",
+  "三文鱼刺身",
+  "寿司拼盘",
+  "天妇罗",
+  "豚骨拉面",
+  "鳗鱼饭",
+  "亲子丼",
+  "日式咖喱饭",
+  "味噌汤",
+  "章鱼小丸子",
+  "日式炸猪排",
+  "部队锅",
+  "石锅拌饭",
+  "韩式炸鸡",
+  "泡菜汤",
+  "韩式烤肉",
+  "韩式冷面",
+  "黑椒牛排",
+  "肉酱意面",
+  "玛格丽特披萨",
+  "凯撒沙拉",
+  "芝士汉堡",
+  "炸鱼薯条",
+  "罗宋汤",
+  "奶油蘑菇汤",
+  "泰式冬阴功",
+  "海南鸡饭",
+  "越南河粉",
+  "泰式炒河粉",
+  "咖喱蟹",
+  "菠萝炒饭",
+  "煎饼果子",
+  "鲜肉包",
+  "生煎包",
+  "鲜肉馄饨",
+  "螺蛳粉",
+  "麻辣烫",
+  "关东煮",
+  "手抓饼",
+  "鸡蛋灌饼",
+  "烤冷面",
+  "臭豆腐",
+  "冰糖葫芦",
+  "小米南瓜粥",
+  "红薯粥",
+  "豆腐脑",
+  "咸豆浆",
+  "胡辣汤",
+  "锅贴",
+  "烧麦",
+  "茶叶蛋",
+  "艇仔粥",
+  "及第粥",
+  "糯米鸡",
+  "韭菜盒子",
+  "葱油饼",
+  "火腿芝士三明治",
+  "班尼迪克蛋",
+  "美式松饼",
+  "春卷",
+  "狼牙土豆",
+  "锅巴土豆",
+  "烤面筋",
+  "鸡蛋仔",
+  "咖喱鱼蛋",
+  "萝卜牛杂",
+  "盐酥鸡",
+  "大肠包小肠",
+  "麻花",
+  "馓子",
+  "肉燕",
+  "福州鱼丸",
+  "凉皮",
+  "钵钵鸡",
+  "糖炒栗子",
+  "西红柿鸡蛋汤",
+  "鲫鱼豆腐汤",
+  "酸萝卜老鸭汤",
+  "山药排骨汤",
+  "莲藕排骨汤",
+  "菌菇鸡汤",
+  "海带排骨汤",
+  "西湖牛肉羹",
+  "粟米羹",
+  "猪肚鸡",
+  "韩式大酱汤",
+  "泰式椰奶鸡汤",
+  "法式洋葱汤",
+  "意式蔬菜汤",
+  "上汤娃娃菜",
+  "干锅花菜",
+  "香菇油菜",
+  "凉拌木耳",
+  "油焖春笋",
+  "荷塘小炒",
+  "罗汉斋",
+  "白灼芥蓝",
+  "虎皮青椒",
+  "红烧萝卜",
+  "皮蛋豆腐",
+  "干煸杏鲍菇",
+  "阳春面",
+  "桂林米粉",
+  "葱油拌面",
+  "炸酱面",
+  "热干面",
+  "云吞面",
+  "扬州炒饭",
+  "台式卤肉饭",
+  "新疆抓饭",
+  "河南烩面",
+  "台式牛肉面",
+  "叉烧饭"
+ ],
+ "cross": {
+  "杨枝甘露": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "双皮奶": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "姜撞奶": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "芒果班戟": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "红豆沙": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "芝麻糊": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "椰汁西米露": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "葡式蛋挞": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "冰糖炖雪梨": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "酒酿圆子": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "桂花糕": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "汤圆": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "冰粉": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "红糖糍粑": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "芋圆": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "烧仙草": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "花生汤": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "提拉米苏": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "焦糖布丁": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "芒果糯米饭": [
+   "dishes.seed.dessert.json",
+   "dishes.seed.recipes.json"
+  ],
+  "酸梅汤": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "柠檬蜂蜜水": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "红糖姜茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "冰糖雪梨汁": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "桂圆红枣茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "港式丝袜奶茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "港式冻柠茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "珍珠奶茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "芋泥啵啵奶茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "美式咖啡": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "生椰拿铁": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "焦糖玛奇朵": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "鲜榨橙汁": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "西瓜汁": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "甘蔗汁": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "芒果冰沙": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "草莓奶昔": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "香蕉牛奶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "热可可": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "蜂蜜柚子茶": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "五谷豆浆": [
+   "dishes.seed.drink.json",
+   "dishes.seed.recipes.json"
+  ],
+  "宫保鸡丁": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "麻婆豆腐": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "白切鸡": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "清蒸鲈鱼": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "红烧肉": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "小笼包": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "麻辣香锅": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "凉拌黄瓜": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "酸辣汤": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "银耳莲子羹": [
+   "dishes.seed.json",
+   "dishes.seed.recipes.json"
+  ],
+  "可乐鸡翅": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "糖醋排骨": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "红烧茄子": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "蒜蓉西兰花": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "干煸四季豆": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "土豆炖牛肉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "冬瓜排骨汤": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "紫菜蛋花汤": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "手撕包菜": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "番茄炒菜花": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "蚝油生菜": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "韭菜炒鸡蛋": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "家常豆腐": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "鱼香肉丝": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "回锅肉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "水煮牛肉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "酸菜鱼": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "担担面": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "蜜汁叉烧": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "肠粉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "煲仔饭": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "白灼虾": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "菠萝咕咾肉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "锅包肉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "地三鲜": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "小鸡炖蘑菇": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "肉夹馍": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "新疆大盘鸡": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "过桥米线": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "日式咖喱饭": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "石锅拌饭": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "韩式炸鸡": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "黑椒牛排": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "肉酱意面": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "玛格丽特披萨": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "凯撒沙拉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "泰式冬阴功": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "海南鸡饭": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "煎饼果子": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "生煎包": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "螺蛳粉": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "麻辣烫": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "手抓饼": [
+   "dishes.seed.more.json",
+   "dishes.seed.recipes.json"
+  ],
+  "小米南瓜粥": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "豆腐脑": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "葱油饼": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "火腿芝士三明治": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "美式松饼": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "春卷": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "狼牙土豆": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "西红柿鸡蛋汤": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "鲫鱼豆腐汤": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "山药排骨汤": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "莲藕排骨汤": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "菌菇鸡汤": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "西湖牛肉羹": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "上汤娃娃菜": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "干锅花菜": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "香菇油菜": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "凉拌木耳": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "皮蛋豆腐": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "阳春面": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "葱油拌面": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "炸酱面": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "热干面": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "扬州炒饭": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ],
+  "台式卤肉饭": [
+   "dishes.seed.more2.json",
+   "dishes.seed.recipes.json"
+  ]
+ }
+}

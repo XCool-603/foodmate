@@ -1,0 +1,57 @@
+list items=301  detail items=301
+
+==============================================================================
+C4-a. DB DUPLICATE DISH NAMES (from GET /api/v1/dishes)
+==============================================================================
+  total items=301  distinct names(case-insensitive)=301
+  duplicates: NONE
+  blank names: NONE
+
+==============================================================================
+C2. CATEGORY GROUPING (categoryLabel over ALL pages)
+==============================================================================
+  荤菜             61
+  甜点             42
+  主食             39
+  素菜             35
+  饮品             35
+  早餐             28
+  汤羹             28
+  小吃             27
+  火锅烧烤            6
+  sum=301  (must equal 301)
+
+  >>> 甜点 (Dessert) = 42   threshold >=30  -> PASS
+  >>> 饮品 (Drink)   = 35   threshold >=25  -> PASS
+
+==============================================================================
+C1. TOTAL DISH COUNT
+==============================================================================
+  /api/v1/dishes data.total reported by API = (see list fetch log) ; items returned = 301
+  /health/ready checks.dishCount = 301
+  threshold >=300 -> PASS   margin = 1
+
+==============================================================================
+C3. RECIPE COMPLETENESS (GET /api/v1/dishes/{id})
+==============================================================================
+  details fetched          = 301
+  recipe != null           = 124
+  recipe == null           = 177
+  recipe != null AND steps>=3 = 124   threshold >=40 -> PASS
+  recipe != null AND steps<3  = 0  -> PASS (none)
+  step-count histogram: {3: 4, 4: 25, 5: 38, 6: 42, 7: 14, 8: 1}
+  min=3 max=8
+  hasRecipe flag inconsistent with recipe payload: 0
+
+==============================================================================
+C3-b. DETAIL-PAYLOAD SANITY
+==============================================================================
+  NONE
+
+==============================================================================
+X. SEED vs DB CONSISTENCY
+==============================================================================
+  seed merged unique names = 301
+  DB names                 = 301
+  in seed not in DB        = []
+  in DB not in seed        = []

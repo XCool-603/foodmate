@@ -1,3 +1,4 @@
+using FoodMate.Core.Entities;
 using FoodMate.Infrastructure.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -59,29 +60,104 @@ public sealed class DbInitializer(
     {
         var seedDishes = DishSeedLoader.Load();
 
-        var existingNames = await db.Dishes
-            .AsNoTracking()
+        // 注意：Steps 是序列化到 recipes.steps 的 JSON 列（值对象），不是导航属性，
+        // 所以**不能**写 ThenInclude —— EF 会因为表达式不是属性访问而抛异常。
+        // Include 了 Recipe 就等于把步骤一起取回来了。
+        var existing = await db.Dishes
             .Where(d => d.IsBuiltin)
-            .Select(d => d.Name)
+            .Include(d => d.Recipe)
             .ToListAsync(ct);
 
-        var existing = new HashSet<string>(existingNames, StringComparer.Ordinal);
+        var byName = existing.ToDictionary(d => d.Name, StringComparer.Ordinal);
 
-        var missing = seedDishes.Where(d => !existing.Contains(d.Name)).ToList();
+        var added = 0;
+        var recipesSynced = 0;
 
-        if (missing.Count == 0)
+        foreach (var seed in seedDishes)
         {
-            logger.LogInformation("内置菜品已是最新，共 {Count} 道。", existingNames.Count);
+            if (!byName.TryGetValue(seed.Name, out var current))
+            {
+                db.Dishes.Add(seed);
+                added++;
+                continue;
+            }
+
+            // 已有菜品：**只同步菜谱**，不动用户可见的属性。
+            //
+            // 为什么必须做这一步：种子里的菜谱是权威版本，而
+            // `dishes.seed.recipes.json` 这种补充文件的存在意义就是
+            // 「补齐并修正」已有菜谱（例如把只有 2 步的补到 3 步）。
+            // 若这里只增不改，新建的开发库能生效，**已部署的库永远拿不到修正**——
+            // 菜谱功能会在生产环境静默缺失。
+            if (seed.Recipe is null || RecipeMatches(current.Recipe, seed.Recipe))
+            {
+                continue;
+            }
+
+            if (current.Recipe is not null)
+            {
+                db.Recipes.Remove(current.Recipe);
+            }
+
+            // 种子里这道菜的 Recipe.DishId 指向的是种子自己的临时 Guid，
+            // 必须改指到库里这道菜的 Id，否则外键会指向一个不存在的菜品。
+            seed.Recipe.DishId = current.Id;
+            current.Recipe = seed.Recipe;
+
+            // 必须显式 Add：Recipe.Id 是 Guid 且配置为 ValueGeneratedOnAdd，
+            // 种子已经赋了非空值，EF 会据此认为「这是一行已存在的数据」，
+            // 于是发 UPDATE 而不是 INSERT，最终抛
+            // DbUpdateConcurrencyException（expected to affect 1 row, affected 0）。
+            db.Recipes.Add(seed.Recipe);
+
+            recipesSynced++;
+        }
+
+        if (added == 0 && recipesSynced == 0)
+        {
+            logger.LogInformation("内置菜品已是最新，共 {Count} 道。", existing.Count);
             return;
         }
 
-        db.Dishes.AddRange(missing);
         await db.SaveChangesAsync(ct);
 
         logger.LogInformation(
-            "已导入内置菜品 {Added} 道（原有 {Existing} 道，种子总数 {Total} 道）。",
-            missing.Count,
-            existingNames.Count,
+            "内置菜品同步完成：新增 {Added} 道、更新菜谱 {Recipes} 份（原有 {Existing} 道，种子总数 {Total} 道）。",
+            added,
+            recipesSynced,
+            existing.Count,
             seedDishes.Count);
+    }
+
+    /// <summary>菜谱是否与种子完全一致（比份数、时长与每步文本）。</summary>
+    private static bool RecipeMatches(Recipe? current, Recipe seed)
+    {
+        if (current is null)
+        {
+            return false;
+        }
+
+        if (current.Servings != seed.Servings || current.CookMinutes != seed.CookMinutes)
+        {
+            return false;
+        }
+
+        var a = current.Steps.OrderBy(s => s.Order).ToList();
+        var b = seed.Steps.OrderBy(s => s.Order).ToList();
+
+        if (a.Count != b.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < a.Count; i++)
+        {
+            if (!string.Equals(a[i].Text, b[i].Text, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

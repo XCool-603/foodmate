@@ -1,0 +1,49 @@
+simulated load order: ['dishes.seed.dessert.json', 'dishes.seed.drink.json', 'dishes.seed.json', 'dishes.seed.more.json', 'dishes.seed.more2.json', 'dishes.seed.recipes.json']
+simulated merged dish count: 301
+simulated recipes: 124
+simulated recipe step min/max: 3 8
+simulated recipes with <3 steps: []
+recipes whose step order != 1..n: 0 []
+
+=== category distribution expected from seed (simulated) ===
+   61 Meat
+   42 Dessert
+   39 Staple
+   35 Drink
+   35 Vegetable
+   28 Breakfast
+   28 Soup
+   27 Snack
+   6 Hotpot
+=== cuisine distribution expected from seed (simulated) ===
+   82 Other
+   41 Cantonese
+   26 Sichuan
+   25 Western
+   13 Jiangsu
+   13 Japanese
+   12 Zhejiang
+   12 Northwest
+   12 Snack
+   11 Hunan
+   10 Fujian
+   10 SoutheastAsian
+   9 Korean
+   8 Northeast
+   7 Shandong
+   7 YunnanGuizhou
+   3 Anhui
+
+=== new-category dishes sourced from which file ===
+  dishes.seed.json           dessert=1 drink=0
+  dishes.seed.more.json      dessert=1 drink=0
+  dishes.seed.dessert.json   dessert=40 drink=0
+  dishes.seed.drink.json     dessert=0 drink=35
+  dishes.seed.more2.json     dessert=0 drink=0
+
+=== dessert file names ===
+  杨枝甘露 / 双皮奶 / 姜撞奶 / 芒果班戟 / 红豆沙 / 芝麻糊 / 椰汁西米露 / 葡式蛋挞 / 榴莲酥 / 糖不甩 / 拔丝地瓜 / 冰糖炖雪梨 / 桂花糖藕 / 酒酿圆子 / 梅花糕 / 定胜糕 / 桂花糕 / 青团 / 驴打滚 / 豌豆黄 / 艾窝窝 / 汤圆 / 冰粉 / 红糖糍粑 / 三大炮 / 蛋烘糕 / 甑糕 / 切糕 / 芋圆 / 烧仙草 / 花生汤 / 提拉米苏 / 芝士蛋糕 / 熔岩巧克力蛋糕 / 焦糖布丁 / 马卡龙 / 抹茶大福 / 铜锣烧 / 韩式刨冰 / 芒果糯米饭
+=== drink file names ===
+  酸梅汤 / 柠檬蜂蜜水 / 红糖姜茶 / 冰糖雪梨汁 / 桂圆红枣茶 / 菊花茶 / 茉莉花茶 / 西湖龙井 / 铁观音 / 普洱茶 / 大麦茶 / 冬瓜茶 / 港式丝袜奶茶 / 鸳鸯奶茶 / 港式冻柠茶 / 珍珠奶茶 / 芋泥啵啵奶茶 / 美式咖啡 / 卡布奇诺 / 生椰拿铁 / 焦糖玛奇朵 / 摩卡咖啡 / 抹茶拿铁 / 鲜榨橙汁 / 西瓜汁 / 甘蔗汁 / 芒果冰沙 / 椰子水 / 草莓奶昔 / 香蕉牛奶 / 热可可 / 蜂蜜柚子茶 / 印度拉茶 / 泰式手标奶茶 / 五谷豆浆
+=== more2 file names ===
+  小米南瓜粥 / 红薯粥 / 豆腐脑 / 咸豆浆 / 胡辣汤 / 锅贴 / 烧麦 / 茶叶蛋 / 艇仔粥 / 及第粥 / 糯米鸡 / 韭菜盒子 / 葱油饼 / 火腿芝士三明治 / 班尼迪克蛋 / 美式松饼 / 春卷 / 狼牙土豆 / 锅巴土豆 / 烤面筋 / 鸡蛋仔 / 咖喱鱼蛋 / 萝卜牛杂 / 盐酥鸡 / 大肠包小肠 / 麻花 / 馓子 / 肉燕 / 福州鱼丸 / 凉皮 / 钵钵鸡 / 糖炒栗子 / 西红柿鸡蛋汤 / 鲫鱼豆腐汤 / 酸萝卜老鸭汤 / 山药排骨汤 / 莲藕排骨汤 / 菌菇鸡汤 / 海带排骨汤 / 西湖牛肉羹 / 粟米羹 / 猪肚鸡 / 韩式大酱汤 / 泰式椰奶鸡汤 / 法式洋葱汤 / 意式蔬菜汤 / 上汤娃娃菜 / 干锅花菜 / 香菇油菜 / 凉拌木耳 / 油焖春笋 / 荷塘小炒 / 罗汉斋 / 白灼芥蓝 / 虎皮青椒 / 红烧萝卜 / 皮蛋豆腐 / 干煸杏鲍菇 / 阳春面 / 桂林米粉 / 葱油拌面 / 炸酱面 / 热干面 / 云吞面 / 扬州炒饭 / 台式卤肉饭 / 新疆抓饭 / 河南烩面 / 台式牛肉面 / 叉烧饭

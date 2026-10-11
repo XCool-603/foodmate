@@ -1,0 +1,98 @@
+=== enum value types & range ===
+dishes.seed.json cuisine types: {'int': 20}
+dishes.seed.more.json cuisine types: {'str': 136}
+dishes.seed.dessert.json cuisine types: {'str': 40}
+dishes.seed.drink.json cuisine types: {'str': 35}
+dishes.seed.more2.json cuisine types: {'str': 70}
+dishes.seed.recipes.json cuisine types: {}
+bad enum values: 0
+
+=== step order sanity (per recipe) ===
+step order problems: 125
+    ('dishes.seed.json', '番茄牛腩', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.json', '西红柿炒蛋', 'non 0..n-1', [1, 2, 3, 4])
+    ('dishes.seed.json', '青椒土豆丝', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.json', '蛋炒饭', 'non 0..n-1', [1, 2, 3, 4])
+    ('dishes.seed.json', '皮蛋瘦肉粥', 'non 0..n-1', [1, 2, 3, 4])
+    ('dishes.seed.json', '番茄鸡蛋面', 'non 0..n-1', [1, 2, 3, 4])
+    ('dishes.seed.json', '凉拌黄瓜', 'non 0..n-1', [1, 2])
+    ('dishes.seed.recipes.json', '凉拌黄瓜', 'non 0..n-1', [1, 2, 3])
+    ('dishes.seed.recipes.json', '宫保鸡丁', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '麻婆豆腐', 'non 0..n-1', [1, 2, 3, 4, 5, 6, 7])
+    ('dishes.seed.recipes.json', '红烧肉', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '清蒸鲈鱼', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '白切鸡', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '酸辣汤', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '银耳莲子羹', 'non 0..n-1', [1, 2, 3, 4])
+    ('dishes.seed.recipes.json', '小笼包', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '麻辣香锅', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '可乐鸡翅', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '糖醋排骨', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '红烧茄子', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '蒜蓉西兰花', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '干煸四季豆', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '土豆炖牛肉', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '冬瓜排骨汤', 'non 0..n-1', [1, 2, 3, 4])
+    ('dishes.seed.recipes.json', '紫菜蛋花汤', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '手撕包菜', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '番茄炒菜花', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '蚝油生菜', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '韭菜炒鸡蛋', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '家常豆腐', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '鱼香肉丝', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '回锅肉', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '水煮牛肉', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '酸菜鱼', 'non 0..n-1', [1, 2, 3, 4, 5, 6, 7])
+    ('dishes.seed.recipes.json', '担担面', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '蜜汁叉烧', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '肠粉', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '煲仔饭', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+    ('dishes.seed.recipes.json', '白灼虾', 'non 0..n-1', [1, 2, 3, 4, 5])
+    ('dishes.seed.recipes.json', '菠萝咕咾肉', 'non 0..n-1', [1, 2, 3, 4, 5, 6])
+
+=== recipe field sanity ===
+recipe field problems: 0
+cookMinutes min/max: 5 150
+difficulty dist: [(1, 58), (2, 56), (3, 11)]
+
+=== near-duplicate names (normalized) ===
+normalized-identical groups: 0
+near-containment pairs (<=2 char diff): 2
+    ('红烧肉', '毛氏红烧肉')
+    ('蜜汁叉烧', '蜜汁叉烧包')
+
+=== outliers ===
+lowest calories:
+    (3, 1200, 3000, '西湖龙井', 'dishes.seed.drink.json')
+    (3, 1000, 2600, '铁观音', 'dishes.seed.drink.json')
+    (4, 1200, 3000, '普洱茶', 'dishes.seed.drink.json')
+    (5, 600, 1200, '菊花茶', 'dishes.seed.drink.json')
+    (5, 600, 1200, '茉莉花茶', 'dishes.seed.drink.json')
+    (8, 500, 1000, '大麦茶', 'dishes.seed.drink.json')
+    (10, 1200, 2500, '美式咖啡', 'dishes.seed.drink.json')
+    (60, 800, 1600, '柠檬蜂蜜水', 'dishes.seed.drink.json')
+highest calories:
+    (680, 3800, 5200, '豚骨拉面', 'dishes.seed.more.json')
+    (680, 3200, 4400, '日式咖喱饭', 'dishes.seed.more.json')
+    (680, 4800, 6800, '部队锅', 'dishes.seed.more.json')
+    (680, 4200, 5800, '韩式炸鸡', 'dishes.seed.more.json')
+    (680, 4800, 6800, '玛格丽特披萨', 'dishes.seed.more.json')
+    (680, 2800, 4200, '芝士汉堡', 'dishes.seed.more.json')
+    (720, 3800, 5200, '炸鱼薯条', 'dishes.seed.more.json')
+    (750, 4500, 7500, '麻辣香锅', 'dishes.seed.json')
+price spread == 0 (min==max): 0
+price min>max: []
+cheapest: [(80, 300, 600, '茶叶蛋', 'dishes.seed.more2.json'), (8, 500, 1000, '大麦茶', 'dishes.seed.drink.json'), (180, 500, 900, '小米南瓜粥', 'dishes.seed.more2.json'), (200, 500, 900, '红薯粥', 'dishes.seed.more2.json'), (180, 500, 1000, '咸豆浆', 'dishes.seed.more2.json')]
+priciest: [(260, 8800, 12800, '葱烧海参', 'dishes.seed.more.json'), (620, 8800, 15800, '黑椒牛排', 'dishes.seed.more.json'), (480, 8800, 12800, '咖喱蟹', 'dishes.seed.more.json'), (380, 12800, 18800, '火腿炖甲鱼', 'dishes.seed.more.json'), (680, 18800, 28800, '佛跳墙', 'dishes.seed.more.json')]
+null price/cal: []
+
+=== ingredient quality ===
+ingredient problems: 0
+ingredients with empty amount by file: {}
+
+dishes with duplicate ingredient names: 0
+dishes with duplicate tags: 0
+
+identical descriptions groups: 0
+identical ingredient-set groups: 1
+    [('dishes.seed.json', '小笼包'), ('dishes.seed.more.json', '鲜肉包')]
