@@ -1,122 +1,158 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { dishApi } from '@/api'
-import type { DishBrief } from '@/api'
-import DishArt from '@/components/DishArt.vue'
+import DialogueBox from '@/components/DialogueBox.vue'
 import { useAuthStore, useDecisionStore, useMetaStore } from '@/stores'
-import { formatPriceRange, greeting, mealPrompt } from '@/utils/format'
+import { greeting } from '@/utils/format'
 
+/**
+ * 首页 = 一场对话。
+ *
+ * 不用表单，让角色一步步问 —— 每一次回答都会得到回应，
+ * 最后交给结果页做抽卡演出。
+ */
 const meta = useMetaStore()
 const decision = useDecisionStore()
 const auth = useAuthStore()
-const deciding = ref(false)
 
-/* ── 决策条件（提交给决策引擎）── */
-const diningMode = ref(0)
-const budgetMin = ref(1500)
-const budgetMax = ref(5000)
+type Step = 'greet' | 'mood' | 'budget' | 'party' | 'ready'
+
+const step = ref<Step>('greet')
+const busy = ref(false)
+
+/* ── 对话收集到的答案 ── */
+const moodLabel = ref('')
+const moodTags = ref<string[]>([])
+const budgetIndex = ref(1)
 const partySize = ref(1)
-const selectedMoods = ref<string[]>([])
 
-const greetingText = computed(() => greeting())
-const promptText = computed(() => mealPrompt())
-const budgetText = computed(() => formatPriceRange(budgetMin.value, budgetMax.value))
-
-/** 顶部状态栏的读数，模仿终端 HUD。 */
-const systemLine = computed(() => {
-  if (meta.state === 'online') {
-    return `SYS · ONLINE · DISH ${meta.dishCount}`
-  }
-  if (meta.state === 'checking') {
-    return 'SYS · CONNECTING…'
-  }
-  return 'SYS · OFFLINE'
-})
-
-const diningModes = computed(() => meta.enums?.diningMode ?? [
-  { value: 0, label: '随便' },
-  { value: 1, label: '外卖' },
-  { value: 2, label: '堂食' },
-  { value: 3, label: '自己做' },
-])
-
-const moodTags = computed(() => meta.enums?.moodTag ?? [])
-
-const partyOptions = [
-  { value: 1, label: '1 人' },
-  { value: 2, label: '2 人' },
-  { value: 3, label: '3–4 人' },
-  { value: 5, label: '5 人以上' },
+const BUDGETS = [
+  { label: '¥15 以内', min: 0, max: 1500, hint: '食堂、快餐' },
+  { label: '¥15–30', min: 1500, max: 3000, hint: '家常小馆' },
+  { label: '¥30–50', min: 3000, max: 5000, hint: '正经吃一顿' },
+  { label: '¥50 以上', min: 5000, max: 15000, hint: '犒劳自己' },
 ]
 
-/* ── 菜品库预览 ── */
-const dishes = ref<DishBrief[]>([])
-const loadingDishes = ref(false)
+/** 角色的台词与选项，按当前步骤给出 */
+const scene = computed(() => {
+  switch (step.value) {
+    case 'greet':
+      return {
+        text: `${greeting()}。又到饭点了 —— 今天想吃点什么？`,
+        mood: 'idle' as const,
+        choices: [
+          { value: 'any', label: '随便啦，你定' },
+          { value: 'spicy', label: '想吃点辣的' },
+          { value: 'light', label: '想吃清淡的' },
+          { value: 'meat', label: '想吃肉' },
+          { value: 'warm', label: '想喝点热的' },
+        ],
+      }
 
-async function loadDishes() {
-  loadingDishes.value = true
+    case 'mood':
+      return {
+        text: `${moodLabel.value}，记下了。那预算大概多少？`,
+        mood: 'happy' as const,
+        choices: BUDGETS.map((b, i) => ({ value: i, label: `${b.label} · ${b.hint}` })),
+      }
+
+    case 'budget':
+      return {
+        text: '一个人吃，还是有人一起？',
+        mood: 'idle' as const,
+        choices: [
+          { value: 1, label: '就我一个' },
+          { value: 2, label: '两个人' },
+          { value: 3, label: '三四个' },
+          { value: 5, label: '一群人了' },
+        ],
+      }
+
+    case 'party':
+      return {
+        text: '好，条件我都记住了。要我现在给你抽一张吗？',
+        mood: 'excited' as const,
+        choices: [{ value: 'draw', label: '抽！' }],
+      }
+
+    default:
+      return {
+        text: '正在翻牌…',
+        mood: 'thinking' as const,
+        choices: [],
+      }
+  }
+})
+
+const summary = computed(() => {
+  const b = BUDGETS[budgetIndex.value]
+  return `${moodLabel.value} · ${b.label} · ${partySize.value} 人`
+})
+
+/* ── 对话推进 ── */
+async function onChoose(value: string | number) {
+  if (busy.value) return
+
+  switch (step.value) {
+    case 'greet': {
+      const map: Record<string, { label: string; tags: string[] }> = {
+        any: { label: '随便都行', tags: [] },
+        spicy: { label: '想吃辣的', tags: ['辣的'] },
+        light: { label: '想吃清淡的', tags: ['清淡的'] },
+        meat: { label: '想吃肉', tags: ['肉'] },
+        warm: { label: '想喝热的', tags: ['暖胃的'] },
+      }
+      const picked = map[String(value)] ?? map.any
+      moodLabel.value = picked.label
+      moodTags.value = picked.tags
+      step.value = 'mood'
+      break
+    }
+
+    case 'mood':
+      budgetIndex.value = Number(value)
+      step.value = 'budget'
+      break
+
+    case 'budget':
+      partySize.value = Number(value)
+      step.value = 'party'
+      break
+
+    case 'party':
+      await draw()
+      break
+  }
+}
+
+/** 调决策接口，然后跳结果页做抽卡演出 */
+async function draw() {
+  if (busy.value) return
+  busy.value = true
+  step.value = 'ready'
+
   try {
-    const page = await dishApi.list({ pageSize: 6 })
-    dishes.value = page.items
-  } catch {
-    dishes.value = []
-  } finally {
-    loadingDishes.value = false
-  }
-}
+    const b = BUDGETS[budgetIndex.value]
 
-function toggleMood(tag: string) {
-  const idx = selectedMoods.value.indexOf(tag)
-  if (idx >= 0) {
-    selectedMoods.value.splice(idx, 1)
-  } else if (selectedMoods.value.length < 3) {
-    selectedMoods.value.push(tag)
-  } else {
-    uni.showToast({ title: '最多选 3 个', icon: 'none' })
-  }
-}
-
-function onBudgetMin(e: { detail: { value: number } }) {
-  budgetMin.value = e.detail.value
-  if (budgetMin.value > budgetMax.value) budgetMax.value = budgetMin.value
-}
-
-function onBudgetMax(e: { detail: { value: number } }) {
-  budgetMax.value = e.detail.value
-  if (budgetMax.value < budgetMin.value) budgetMin.value = budgetMax.value
-}
-
-async function onDecide() {
-  if (deciding.value) return
-
-  if (!meta.isOnline) {
-    uni.showModal({
-      title: '还没连上后端',
-      content: `当前 API 地址：${meta.apiBaseUrl}\n\n请确认 src/FoodMate.Api 已启动。`,
-      showCancel: false,
-    })
-    return
-  }
-
-  deciding.value = true
-
-  try {
     const response = await decision.suggest({
       mealType: null,
-      diningMode: diningMode.value,
+      diningMode: 0,
       partySize: partySize.value,
-      budgetMinCents: budgetMin.value,
-      budgetMaxCents: budgetMax.value,
-      moodTags: [...selectedMoods.value],
+      budgetMinCents: b.min,
+      budgetMaxCents: b.max,
+      moodTags: [...moodTags.value],
       exploreJitter: 0,
     })
 
     if (response.ranked.length === 0) {
       uni.showModal({
-        title: '没找到合适的菜',
-        content: '试试放宽预算，或检查口味画像里是否设置了忌口。',
+        title: '没找到合适的',
+        content: '试试放宽预算，或者去「我的 → 口味画像」看看是不是忌口设多了。',
         showCancel: false,
+        success: () => {
+          step.value = 'greet'
+          busy.value = false
+        },
       })
       return
     }
@@ -124,257 +160,92 @@ async function onDecide() {
     uni.navigateTo({ url: '/pages/decide/result' })
   } catch (err) {
     uni.showToast({ title: (err as Error).message, icon: 'none' })
+    step.value = 'greet'
   } finally {
-    deciding.value = false
+    busy.value = false
   }
 }
 
-function onDishTap(dish: DishBrief) {
-  uni.navigateTo({ url: `/pages/dish/detail?id=${dish.id}` })
-}
-
-function onStartOnboarding() {
-  uni.navigateTo({ url: '/pages/onboarding/index' })
+function onRestart() {
+  step.value = 'greet'
+  moodLabel.value = ''
+  moodTags.value = []
+  budgetIndex.value = 1
+  partySize.value = 1
 }
 
 onShow(() => {
   void meta.checkConnection()
   void meta.loadEnums()
-  void loadDishes()
-
-  // 首次登录后补一次用户资料，拿到 needsOnboarding
   if (auth.isAuthenticated) void auth.loadMe()
 })
 </script>
 
 <template>
   <view class="page">
-    <!-- ── 顶部状态栏 ─────────────────────────────────── -->
+    <!-- 顶部状态 -->
     <view class="sysbar">
       <text class="sysbar__dot" :class="`sysbar__dot--${meta.state}`">●</text>
-      <text class="sysbar__text">{{ systemLine }}</text>
+      <text class="sysbar__text">
+        {{ meta.isOnline ? `ONLINE · DISH ${meta.dishCount}` : 'OFFLINE' }}
+      </text>
+      <text v-if="step !== 'greet'" class="sysbar__reset" @tap="onRestart">重来</text>
     </view>
 
-    <!-- ── 主视觉 ─────────────────────────────────────── -->
-    <view class="hero">
-      <text class="hero__greeting">{{ greetingText }}，欢迎回来</text>
-      <text class="hero__title">{{ promptText }}</text>
-      <view class="hero__scan" />
+    <!-- 已收集的条件 -->
+    <view v-if="step !== 'greet'" class="tags">
+      <text class="tags__item">{{ summary }}</text>
     </view>
 
-    <!-- ── 引导提示（仅未完成引导时）──────────────────── -->
-    <view
-      v-if="auth.needsOnboarding"
-      class="onboard anim-pop"
-      hover-class="hover-dim"
-      @tap="onStartOnboarding"
-    >
-      <text class="onboard__glyph anim-float">✦</text>
-      <view class="onboard__body">
-        <text class="onboard__title">先告诉我你的口味</text>
-        <text class="onboard__desc">5 个问题 · 30 秒 · 之后推荐才准</text>
-      </view>
-      <text class="onboard__arrow">›</text>
+    <!-- 对话 -->
+    <view class="stage">
+      <DialogueBox
+        :key="step"
+        :text="scene.text"
+        :choices="scene.choices"
+        :mood="scene.mood"
+        speaker="小food"
+        @choose="onChoose"
+      />
     </view>
 
-    <!-- ── 怎么吃 ─────────────────────────────────────── -->
-    <view class="fm-card">
-      <view class="head">
-        <text class="head__mark">01</text>
-        <text class="head__title">怎么吃</text>
-      </view>
-      <view class="fm-chips">
-        <view
-          v-for="m in diningModes"
-          :key="m.value"
-          class="fm-chip"
-          :class="{ 'fm-chip--active': diningMode === m.value }"
-          @tap="diningMode = m.value"
-        >
-          {{ m.label }}
-        </view>
-      </view>
+    <!-- 离线提示 -->
+    <view v-if="!meta.isOnline && meta.errorMessage" class="offline">
+      <text class="offline__title">连不上后端</text>
+      <text class="offline__desc">{{ meta.apiBaseUrl }}</text>
+      <text class="offline__desc">{{ meta.errorMessage }}</text>
     </view>
-
-    <!-- ── 预算 ───────────────────────────────────────── -->
-    <view class="fm-card">
-      <view class="head">
-        <text class="head__mark">02</text>
-        <text class="head__title">预算</text>
-        <text class="head__value">{{ budgetText }}</text>
-      </view>
-      <view class="slider-row">
-        <text class="slider-row__label">MIN</text>
-        <slider
-          class="slider-row__slider"
-          :value="budgetMin"
-          :min="0"
-          :max="20000"
-          :step="500"
-          activeColor="#00F0FF"
-          backgroundColor="#1B1B29"
-          block-color="#00F0FF"
-          block-size="18"
-          @change="onBudgetMin"
-        />
-      </view>
-      <view class="slider-row">
-        <text class="slider-row__label">MAX</text>
-        <slider
-          class="slider-row__slider"
-          :value="budgetMax"
-          :min="0"
-          :max="20000"
-          :step="500"
-          activeColor="#00F0FF"
-          backgroundColor="#1B1B29"
-          block-color="#00F0FF"
-          block-size="18"
-          @change="onBudgetMax"
-        />
-      </view>
-    </view>
-
-    <!-- ── 人数 ───────────────────────────────────────── -->
-    <view class="fm-card">
-      <view class="head">
-        <text class="head__mark">03</text>
-        <text class="head__title">几个人吃</text>
-      </view>
-      <view class="fm-chips">
-        <view
-          v-for="p in partyOptions"
-          :key="p.value"
-          class="fm-chip"
-          :class="{ 'fm-chip--active': partySize === p.value }"
-          @tap="partySize = p.value"
-        >
-          {{ p.label }}
-        </view>
-      </view>
-    </view>
-
-    <!-- ── 想吃点 ─────────────────────────────────────── -->
-    <view class="fm-card">
-      <view class="head">
-        <text class="head__mark">04</text>
-        <text class="head__title">想吃点</text>
-        <text class="head__hint">{{ selectedMoods.length }}/3</text>
-      </view>
-      <view class="fm-chips">
-        <view
-          v-for="tag in moodTags"
-          :key="tag"
-          class="fm-chip"
-          :class="{ 'fm-chip--active': selectedMoods.includes(tag) }"
-          @tap="toggleMood(tag)"
-        >
-          {{ tag }}
-        </view>
-      </view>
-    </view>
-
-    <!-- ── 主 CTA ─────────────────────────────────────── -->
-    <view
-      class="fm-button cta"
-      :class="{ 'fm-button--disabled': deciding }"
-      @tap="onDecide"
-    >
-      {{ deciding ? '正在计算…' : '帮我决定' }}
-    </view>
-
-    <!-- ── 连接状态 ───────────────────────────────────── -->
-    <view class="status" :class="`status--${meta.state}`">
-      <view class="status__row">
-        <text class="status__key">ENDPOINT</text>
-        <text class="status__val">{{ meta.apiBaseUrl }}</text>
-      </view>
-      <view v-if="meta.isOnline" class="status__row">
-        <text class="status__key">SERVICE</text>
-        <text class="status__val status__val--ok">
-          v{{ meta.health?.version }} · {{ meta.health?.environment }} · {{ meta.platformLabel }}
-        </text>
-      </view>
-      <view v-else-if="meta.errorMessage" class="status__row">
-        <text class="status__key">ERROR</text>
-        <text class="status__val status__val--err">{{ meta.errorMessage }}</text>
-      </view>
-    </view>
-
-    <!-- ── 菜品库 ─────────────────────────────────────── -->
-    <view class="head head--list">
-      <text class="head__mark">DB</text>
-      <text class="head__title">菜品库</text>
-      <text class="head__hint">{{ dishes.length }} / {{ meta.dishCount }}</text>
-    </view>
-
-    <view v-if="loadingDishes" class="empty">读取中…</view>
-    <view v-else-if="dishes.length === 0" class="empty">
-      暂无菜品。请确认后端已启动并完成种子数据导入。
-    </view>
-
-    <view v-else class="dish-list anim-stagger">
-      <view
-        v-for="dish in dishes"
-        :key="dish.id"
-        class="dish"
-        hover-class="hover-lift"
-        @tap="onDishTap(dish)"
-      >
-        <DishArt
-          variant="thumb"
-          :name="dish.name"
-          :cuisine="dish.cuisine"
-          :category="dish.category"
-          :spicy-level="dish.spicyLevel"
-          :image-url="dish.imageUrl"
-        />
-        <view class="dish__body">
-          <view class="dish__head">
-            <text class="dish__name">{{ dish.name }}</text>
-            <text class="dish__price">{{ formatPriceRange(dish.priceMinCents, dish.priceMaxCents) }}</text>
-          </view>
-          <view class="dish__meta">
-            <text class="dish__tag">{{ dish.cuisineLabel }}</text>
-            <text class="dish__tag">{{ dish.categoryLabel }}</text>
-            <text class="dish__tag">{{ dish.spicyLabel }}</text>
-            <text v-if="dish.calories" class="dish__tag">{{ dish.calories }} kcal</text>
-            <text v-if="dish.hasRecipe" class="dish__tag dish__tag--recipe">
-              可自制 {{ dish.cookMinutes }}min
-            </text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <view class="footer">FOODMATE · M5 · NEON BUILD</view>
   </view>
 </template>
 
 <style lang="scss" scoped>
 .page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   padding: $fm-gap-md;
-  padding-bottom: 60rpx;
+  padding-bottom: calc(#{$fm-gap-lg} + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
-/* ── 顶部状态栏 ───────────────────────────────────────────── */
+/* ── 顶部状态 ─────────────────────────────────────────────── */
 .sysbar {
   display: flex;
   align-items: center;
   gap: 10rpx;
-  padding: 0 4rpx 8rpx;
+  padding: 0 4rpx $fm-gap-md;
 
   &__dot {
     font-size: 18rpx;
 
     &--online {
       color: $cy-lime;
-      text-shadow: 0 0 10rpx rgba(0, 255, 159, 0.8);
+      text-shadow: 0 0 12rpx rgba(0, 255, 159, 0.9);
     }
 
     &--offline {
       color: $cy-red;
-      text-shadow: 0 0 10rpx rgba(255, 59, 92, 0.8);
+      text-shadow: 0 0 12rpx rgba(255, 59, 92, 0.9);
     }
 
     &--checking,
@@ -385,301 +256,62 @@ onShow(() => {
   }
 
   &__text {
-    @include hud-label($cy-text-faint);
+    @include hud-label();
   }
-}
 
-/* ── 主视觉 ───────────────────────────────────────────────── */
-.hero {
-  position: relative;
-  padding: $fm-gap-md 4rpx $fm-gap-lg;
-  margin-bottom: $fm-gap-md;
-  overflow: hidden;
-
-  &__greeting {
-    display: block;
+  &__reset {
+    margin-left: auto;
     @include hud-label($cy-cyan);
-    opacity: 0.75;
-  }
-
-  &__title {
-    display: block;
-    margin-top: 14rpx;
-    font-size: 52rpx;
-    font-weight: 800;
-    line-height: 1.3;
-    letter-spacing: 1rpx;
-    color: $cy-text;
-    text-shadow:
-      0 0 18rpx rgba(0, 240, 255, 0.35),
-      2rpx 0 0 rgba(255, 46, 151, 0.35),
-      -2rpx 0 0 rgba(0, 240, 255, 0.35);
-    animation: fm-glitch 6s steps(1) infinite;
-  }
-
-  /* 扫描线覆盖，只有这一块有 */
-  &__scan {
-    position: absolute;
-    inset: 0;
-    @include scanlines(0.035);
-    pointer-events: none;
   }
 }
 
-/* ── 引导提示 ─────────────────────────────────────────────── */
-.onboard {
+/* ── 已选条件 ─────────────────────────────────────────────── */
+.tags {
   display: flex;
-  align-items: center;
-  gap: $fm-gap-md;
-  padding: $fm-gap-md $fm-gap-lg;
+  flex-wrap: wrap;
+  gap: 10rpx;
   margin-bottom: $fm-gap-md;
+
+  &__item {
+    padding: 8rpx 22rpx;
+    border-radius: $fm-radius-pill;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    font-family: $cy-mono;
+    font-size: 21rpx;
+    color: $cy-cyan;
+    text-shadow: 0 0 10rpx rgba(0, 240, 255, 0.6);
+  }
+}
+
+/* ── 对话区 ───────────────────────────────────────────────── */
+.stage {
+  flex: 1;
+  padding-top: $fm-gap-lg;
+}
+
+/* ── 离线 ─────────────────────────────────────────────────── */
+.offline {
+  margin-top: $fm-gap-lg;
+  padding: $fm-gap-md $fm-gap-lg;
   border-radius: $fm-radius-md;
-  background:
-    linear-gradient(100deg, rgba(255, 46, 151, 0.16), rgba(0, 240, 255, 0.1)),
-    $cy-surface;
-  border: 1px solid $cy-magenta;
-  box-shadow: 0 0 18rpx rgba(255, 46, 151, 0.3);
-
-  &__glyph {
-    font-size: 40rpx;
-    color: $cy-amber;
-    text-shadow: 0 0 16rpx rgba(255, 197, 61, 0.8);
-  }
-
-  &__body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4rpx;
-  }
+  background: rgba(255, 59, 92, 0.08);
+  border: 1px solid rgba(255, 59, 92, 0.4);
 
   &__title {
-    font-size: 29rpx;
+    display: block;
+    font-size: 27rpx;
     font-weight: 700;
+    color: $cy-red;
   }
 
   &__desc {
+    display: block;
+    margin-top: 6rpx;
     font-family: $cy-mono;
-    font-size: 20rpx;
+    font-size: 21rpx;
     color: $cy-text-faint;
-  }
-
-  &__arrow {
-    font-size: 40rpx;
-    color: $cy-magenta;
-    text-shadow: 0 0 12rpx rgba(255, 46, 151, 0.7);
-  }
-}
-
-/* ── 区块标题 ─────────────────────────────────────────────── */
-.head {
-  display: flex;
-  align-items: baseline;
-  gap: 14rpx;
-  margin-bottom: $fm-gap-md;
-
-  &--list {
-    margin: $fm-gap-lg 8rpx $fm-gap-md;
-  }
-
-  &__mark {
-    font-family: $cy-mono;
-    font-size: 20rpx;
-    font-weight: 700;
-    color: $cy-void;
-    background: $cy-cyan;
-    padding: 2rpx 10rpx;
-    box-shadow: 0 0 12rpx rgba(0, 240, 255, 0.5);
-  }
-
-  &__title {
-    font-size: 30rpx;
-    font-weight: 700;
-    letter-spacing: 2rpx;
-  }
-
-  &__value {
-    margin-left: auto;
-    @include neon-text($cy-cyan);
-    font-family: $cy-mono;
-    font-size: 28rpx;
-    font-weight: 700;
-  }
-
-  &__hint {
-    margin-left: auto;
-    @include hud-label();
-  }
-}
-
-/* ── 滑块 ─────────────────────────────────────────────────── */
-.slider-row {
-  display: flex;
-  align-items: center;
-
-  & + & {
-    margin-top: 8rpx;
-  }
-
-  &__label {
-    width: 70rpx;
-    @include hud-label();
-  }
-
-  &__slider {
-    flex: 1;
-    margin: 0;
-  }
-}
-
-/* ── CTA ──────────────────────────────────────────────────── */
-.cta {
-  margin-top: $fm-gap-lg;
-  height: 108rpx;
-  font-size: 34rpx;
-}
-
-/* ── 连接状态 ─────────────────────────────────────────────── */
-.status {
-  margin-top: $fm-gap-lg;
-  padding: $fm-gap-md $fm-gap-lg;
-  background: $cy-surface;
-  border: 1px solid $cy-line;
-  border-left: 3px solid $cy-cyan;
-
-  &--offline {
-    border-left-color: $cy-red;
-  }
-
-  &--checking,
-  &--unknown {
-    border-left-color: $cy-amber;
-  }
-
-  &__row {
-    display: flex;
-    align-items: flex-start;
-    gap: $fm-gap-md;
-
-    & + & {
-      margin-top: 8rpx;
-    }
-  }
-
-  &__key {
-    width: 130rpx;
-    flex-shrink: 0;
-    @include hud-label();
-  }
-
-  &__val {
-    flex: 1;
-    font-family: $cy-mono;
-    font-size: 22rpx;
-    color: $cy-text-dim;
     word-break: break-all;
-
-    &--ok {
-      color: $cy-lime;
-    }
-
-    &--err {
-      color: $cy-red;
-    }
   }
-}
-
-/* ── 菜品列表 ─────────────────────────────────────────────── */
-.dish-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2rpx;
-}
-
-.dish {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: $fm-gap-md;
-  padding: $fm-gap-md;
-  background: $cy-surface;
-  border: 1px solid $cy-line;
-  border-radius: $fm-radius-md;
-  transition: all 0.16s ease;
-
-  /* 左侧霓虹条：通电感 */
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 22%;
-    bottom: 22%;
-    width: 3px;
-    border-radius: $fm-radius-pill;
-    background: rgba(0, 240, 255, 0.45);
-  }
-
-  &__body {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: $fm-gap-sm;
-  }
-
-  &__name {
-    font-size: 30rpx;
-    font-weight: 700;
-    letter-spacing: 1rpx;
-  }
-
-  &__price {
-    @include neon-text($cy-amber);
-    font-family: $cy-mono;
-    font-size: 26rpx;
-    font-weight: 700;
-  }
-
-  &__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10rpx;
-    margin-top: 12rpx;
-  }
-
-  &__tag {
-    font-family: $cy-mono;
-    font-size: 20rpx;
-    color: $cy-text-faint;
-    border: 1px solid $cy-line;
-    padding: 2rpx 12rpx;
-
-    &--recipe {
-      color: $cy-cyan;
-      border-color: rgba(0, 240, 255, 0.4);
-      background: rgba(0, 240, 255, 0.06);
-    }
-  }
-}
-
-.empty {
-  padding: 60rpx 0;
-  text-align: center;
-  font-family: $cy-mono;
-  font-size: 24rpx;
-  color: $cy-text-faint;
-}
-
-.footer {
-  margin-top: $fm-gap-lg;
-  text-align: center;
-  @include hud-label($cy-text-faint);
-  opacity: 0.6;
 }
 </style>

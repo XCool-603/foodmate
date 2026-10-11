@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
-import GachaCard from '@/components/GachaCard.vue'
+import GachaReveal from '@/components/GachaReveal.vue'
 import AnimatedNumber from '@/components/AnimatedNumber.vue'
 import { engineApi } from '@/api'
 import type { EngineMeta, ScoredDish } from '@/api'
@@ -51,46 +51,31 @@ const drawLabel = computed(() => {
   return drawnIds.value.size >= store.wheelItems.length ? '重新抽' : '再抽一次'
 })
 
-/** 抽卡 */
+/** 抽卡 —— 悬念与演出交给 GachaReveal，这里只负责选牌与回传 */
 function onDraw() {
   if (drawing.value || store.wheelItems.length === 0) return
 
   drawing.value = true
-  revealed.value = false
   drawn.value = null
   highlighted.value = null
 
-  // 悬念：牌堆抖动一下再出牌，比瞬间出结果更有"抽"的感觉
-  setTimeout(() => {
-    const pool = drawPool.value
-    const pick = pool[Math.floor(Math.random() * pool.length)]
+  const pool = drawPool.value
+  const pick = pool[Math.floor(Math.random() * pool.length)]
 
-    drawn.value = pick
-    drawnIds.value = new Set([...drawnIds.value, pick.dishId])
-    highlighted.value = pick.dishId
-    drawing.value = false
+  // 直接把结果递给演出组件，由它播完抖动 → 爆闪 → 横幅 → 落牌
+  drawn.value = pick
+  drawnIds.value = new Set([...drawnIds.value, pick.dishId])
+  highlighted.value = pick.dishId
+  drawing.value = false
 
-    // 先让卡面出现（缩在牌堆里），下一帧再翻开，触发过渡动画
-    setTimeout(() => {
-      revealed.value = true
-    }, 50)
-
-    // 回传选择，这是权重调优的核心数据
-    void store.choose(pick.dishId, 'card')
-
-    try {
-      uni.vibrateShort({ type: 'medium' })
-    } catch {
-      // 不支持时忽略
-    }
-  }, 420)
+  // 回传选择，这是权重调优的核心数据
+  void store.choose(pick.dishId, 'card')
 }
 
 /** 抽完了，重置已抽记录 */
 function onResetDeck() {
   drawnIds.value = new Set()
   drawn.value = null
-  revealed.value = false
   highlighted.value = null
   uni.showToast({ title: '牌堆已重置', icon: 'none' })
 }
@@ -269,12 +254,7 @@ onLoad(async () => {
         </text>
       </view>
 
-      <GachaCard
-        :item="drawn"
-        :revealed="revealed"
-        :drawing="drawing"
-        @tap="drawn ? null : onDraw()"
-      />
+      <GachaReveal :item="drawn" :drawing="drawing" @draw="onDraw" />
 
       <!-- 稀有度图例 -->
       <view class="legend">
