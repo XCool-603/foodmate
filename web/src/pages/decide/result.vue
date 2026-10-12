@@ -15,6 +15,9 @@ const engine = ref<EngineMeta | null>(null)
 
 /** 当前抽中的卡 */
 const drawn = ref<ScoredDish | null>(null)
+
+/** 抽卡组件的引用，用于「再抽一次」时重置牌阵 */
+const revealRef = ref<InstanceType<typeof GachaReveal> | null>(null)
 /** 悬念中（牌堆抖动） */
 const drawing = ref(false)
 /** 卡面已翻开 */
@@ -51,25 +54,24 @@ const drawLabel = computed(() => {
   return drawnIds.value.size >= store.wheelItems.length ? '重新抽' : '再抽一次'
 })
 
-/** 抽卡 —— 悬念与演出交给 GachaReveal，这里只负责选牌与回传 */
-function onDraw() {
-  if (drawing.value || store.wheelItems.length === 0) return
+/** 抽卡 —— 牌阵由用户自己挑，这里只负责把选中那张解析成菜品并回传 */
+function onPick(index: number) {
+  const pick = drawPool.value[index]
+  if (!pick) return
 
-  drawing.value = true
-  drawn.value = null
-  highlighted.value = null
-
-  const pool = drawPool.value
-  const pick = pool[Math.floor(Math.random() * pool.length)]
-
-  // 直接把结果递给演出组件，由它播完抖动 → 爆闪 → 横幅 → 落牌
   drawn.value = pick
   drawnIds.value = new Set([...drawnIds.value, pick.dishId])
   highlighted.value = pick.dishId
-  drawing.value = false
 
   // 回传选择，这是权重调优的核心数据
   void store.choose(pick.dishId, 'card')
+}
+
+/** 再抽一次：清空结果，让牌阵重新摊开 */
+function onAgain() {
+  drawn.value = null
+  highlighted.value = null
+  revealRef.value?.again()
 }
 
 /** 抽完了，重置已抽记录 */
@@ -254,7 +256,13 @@ onLoad(async () => {
         </text>
       </view>
 
-      <GachaReveal :item="drawn" :drawing="drawing" @draw="onDraw" />
+      <GachaReveal
+        ref="revealRef"
+        :items="drawPool"
+        :revealed="drawn"
+        :drawing="drawing"
+        @pick="onPick"
+      />
 
       <!-- 稀有度图例 -->
       <view class="legend">
@@ -279,16 +287,18 @@ onLoad(async () => {
       <!-- 操作 -->
       <view class="gacha__actions">
         <view
+          v-if="drawn"
           class="fm-button gacha__draw"
-          :class="{ 'fm-button--disabled': drawing }"
-          @tap="onDraw"
+          hover-class="hover-dim"
+          @tap="onAgain"
         >
-          {{ drawLabel }}
+          {{ drawnIds.size >= store.wheelItems.length ? '重新摊牌' : '再抽一次' }}
         </view>
         <view
           v-if="drawn"
           class="fm-button fm-button--ghost gacha__eat"
           :class="{ 'fm-button--disabled': choosing }"
+          hover-class="hover-dim"
           @tap="onEatThis(drawn)"
         >
           就吃这个
