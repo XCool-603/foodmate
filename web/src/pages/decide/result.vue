@@ -67,11 +67,13 @@ function onPick(index: number) {
   void store.choose(pick.dishId, 'card')
 }
 
-/** 再抽一次：清空结果，让牌阵重新摊开 */
+/** 再抽一次：清空结果，让牌阵重新摊开并自动开抽 */
 function onAgain() {
   drawn.value = null
   highlighted.value = null
-  revealRef.value?.again()
+  revealRef.value?.reset()
+  // 组件会在 600ms 后自动重新开始
+  setTimeout(() => revealRef.value?.start(), 700)
 }
 
 /** 抽完了，重置已抽记录 */
@@ -260,7 +262,6 @@ onLoad(async () => {
         ref="revealRef"
         :items="drawPool"
         :revealed="drawn"
-        :drawing="drawing"
         @pick="onPick"
       />
 

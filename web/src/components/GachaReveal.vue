@@ -1,49 +1,51 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { dishApi } from '@/api'
 import type { DishDetail, ScoredDish } from '@/api'
 import AnimatedNumber from './AnimatedNumber.vue'
 import DishArt from './DishArt.vue'
 
 /**
- * 抽卡演出。
+ * 抽卡演出（自动）。
  *
- * 与「直接显示结果」的区别全在节奏上，七个阶段层层加码：
- *   spread   摊开牌阵，全部背面朝上，由**用户自己挑一张**
- *   lifting  选中的牌飞出牌阵、其余牌退场
- *   burst    白光爆闪 + 光芒放射
- *   banner   稀有度横幅横扫而入
- *   card     卡牌翻开落位
- *   detail   详情面板推上来（食材 / 口感 / 做法）
- *   done     定格，可操作
+ * 用户不挑牌 —— 点「开始抽」之后由系统自动选中一张，
+ * 过程用「老虎机」式的光标滚动来制造悬念。
  *
- * 稀有度按**推荐排名**划分，保证任何数据分布下都有梯度。
+ * 阶段：
+ *   deck    牌阵摊开，全部背面朝上
+ *   rolling 光标在牌间高速滚动，逐渐减速（悬念）
+ *   lifting 光标落定，那张牌飞出牌阵
+ *   burst   白光爆闪 + 光芒放射
+ *   banner  稀有度横幅横扫而入
+ *   card    卡牌翻开落位
+ *   detail  详情推上来（口感 / 食材 / 做法）
+ *   done    定格
  */
 export type RarityKey = 'SSR' | 'SR' | 'R' | 'N'
 
 const props = withDefaults(
   defineProps<{
-    /** 牌阵：背面朝上的候选（用户不知道哪张是什么） */
+    /** 牌阵候选 */
     items: ScoredDish[]
-    /** 已揭晓的菜；null 表示还在挑 */
+    /** 已揭晓的菜；null 表示还在抽 */
     revealed: ScoredDish | null
-    /** 父级正在请求 */
-    drawing?: boolean
   }>(),
-  { drawing: false },
+  {},
 )
 
 const emit = defineEmits<{
   (e: 'pick', index: number): void
-  (e: 'reset'): void
 }>()
 
-type Phase = 'spread' | 'lifting' | 'burst' | 'banner' | 'card' | 'detail' | 'done'
+type Phase = 'deck' | 'rolling' | 'lifting' | 'burst' | 'banner' | 'card' | 'detail' | 'done'
 
-const phase = ref<Phase>('spread')
-const pickedIndex = ref(-1)
+const phase = ref<Phase>('deck')
+/** 光标当前停在牌阵的第几张 */
+const cursor = ref(0)
+/** 最终落定的那张 */
+const landed = ref(-1)
 
-/* ── 菜品详情（食材与做法）── */
+/* ── 详情 ── */
 const detail = ref<DishDetail | null>(null)
 const detailLoading = ref(false)
 const detailError = ref<string | null>(null)
@@ -59,27 +61,24 @@ const rarity = computed<{ key: RarityKey; label: string; stars: number }>(() => 
 const rarityClass = computed(() => `reveal--${rarity.value.key.toLowerCase()}`)
 const stars = computed(() => '★'.repeat(rarity.value.stars) + '☆'.repeat(5 - rarity.value.stars))
 
-/** 牌阵最多摊 5 张 —— 再多在小屏上就挤成一团了 */
+/** 牌阵最多摊 5 张 */
 const spread = computed(() => props.items.slice(0, 5))
 
-/** 每张牌的扇形角度与偏移 */
-function cardStyle(i: number, total: number) {
-  const mid = (total - 1) / 2
-  const offset = i - mid
-  return {
-    transform: `translateX(${offset * 78}rpx) translateY(${Math.abs(offset) * 16}rpx) rotate(${offset * 7}deg)`,
-    zIndex: 10 - Math.abs(offset),
-  }
-}
+const showDeck = computed(() => phase.value === 'deck' || phase.value === 'rolling' || phase.value === 'lifting')
+const showCard = computed(
+  () => phase.value === 'card' || phase.value === 'detail' || phase.value === 'done',
+)
+const showBanner = computed(
+  () => phase.value === 'banner' || showCard.value,
+)
+const showDetail = computed(() => phase.value === 'detail' || phase.value === 'done')
 
-/** 口感：从辣度、菜系、标签拼出一句话 */
+/** 口感：菜系 + 辣度 + 标签 */
 const taste = computed(() => {
   const d = props.revealed?.dish
   if (!d) return ''
-
   const heat = ['不辣', '微辣', '小辣', '中辣', '重辣', '变态辣'][d.spicyLevel] ?? '未知'
-  const parts = [`${d.cuisineLabel}风味`, heat]
-  if (d.tags.length) parts.push(...d.tags.slice(0, 3))
+  const parts = [`${d.cuisineLabel}风味`, heat, ...d.tags.slice(0, 3)]
   return parts.join(' · ')
 })
 
@@ -94,6 +93,7 @@ const metaLine = computed(() => {
   return parts.join(' · ')
 })
 
+/* ── 定时器 ── */
 const timers: ReturnType<typeof setTimeout>[] = []
 function after(ms: number, fn: () => void) {
   timers.push(setTimeout(fn, ms))
@@ -111,53 +111,90 @@ function vibrate(type: 'light' | 'medium' | 'heavy') {
   }
 }
 
-/** 用户点牌阵里的一张 */
-function onPickCard(i: number) {
-  if (phase.value !== 'spread' || props.drawing) return
+/**
+ * 开始抽卡：光标在牌间滚动并减速，最后落在随机一张上。
+ *
+ * 减速曲线用 progress² —— 前段飞快、后段拖慢，
+ * 这是老虎机让人上瘾的节奏。
+ */
+function start() {
+  if (spread.value.length === 0 || phase.value !== 'deck') return
 
-  pickedIndex.value = i
-  phase.value = 'lifting'
-  vibrate('light')
+  const total = spread.value.length
+  const target = Math.floor(Math.random() * total)
+  const laps = 3
+  const totalSteps = total * laps + target
 
-  emit('pick', i)
+  phase.value = 'rolling'
+
+  let step = 0
+
+  const tick = () => {
+    cursor.value = step % total
+    step++
+
+    if (step > totalSteps) {
+      cursor.value = target
+      landed.value = target
+
+      // 落定 → 抬牌
+      after(320, () => {
+        phase.value = 'lifting'
+        vibrate('light')
+      })
+
+      // 抬牌 → 爆闪
+      after(1000, () => {
+        phase.value = 'burst'
+        vibrate('heavy')
+      })
+
+      // 爆闪 → 横幅
+      after(1350, () => {
+        phase.value = 'banner'
+        vibrate('medium')
+      })
+
+      // 横幅 → 落牌
+      after(2050, () => {
+        phase.value = 'card'
+        vibrate('light')
+      })
+
+      // 落牌 → 详情
+      after(2800, () => {
+        phase.value = 'detail'
+      })
+
+      after(3400, () => {
+        phase.value = 'done'
+      })
+
+      return
+    }
+
+    const progress = step / totalSteps
+    const delay = 55 + progress * progress * 260
+    timers.push(setTimeout(tick, delay))
+  }
+
+  tick()
+
+  // 通知父级解析落定的那张
+  emit('pick', target)
 }
 
-/** 父级把结果递回来 → 继续演出 */
+/** 父级把结果递回来 → 拉详情 */
 watch(
   () => props.revealed,
   (next) => {
-    if (!next) return
-
-    clearTimers()
-
-    after(700, () => {
-      phase.value = 'burst'
-      vibrate('heavy')
-    })
-    after(1050, () => {
-      phase.value = 'banner'
-      vibrate('medium')
-    })
-    after(1750, () => {
-      phase.value = 'card'
-      vibrate('light')
-    })
-    after(2500, () => {
-      phase.value = 'detail'
-    })
-    after(3100, () => {
-      phase.value = 'done'
-    })
-
-    void loadDetail(next.dishId)
+    if (next) void loadDetail(next.dishId)
   },
 )
 
-/** 拉菜品详情，拿食材与做法 */
 async function loadDetail(dishId: string) {
   detailLoading.value = true
   detailError.value = null
-
   try {
     detail.value = await dishApi.detail(dishId)
   } catch (err) {
@@ -167,80 +204,79 @@ async function loadDetail(dishId: string) {
   }
 }
 
-/** 再抽一次：重置回牌阵 */
-function onAgain() {
+/** 重置回牌阵（供「再抽一次」调用） */
+function reset() {
   clearTimers()
-  phase.value = 'spread'
-  pickedIndex.value = -1
+  phase.value = 'deck'
+  cursor.value = 0
+  landed.value = -1
   detail.value = null
   detailError.value = null
-  emit('reset')
 }
 
-defineExpose({ again: onAgain })
+defineExpose({ start, reset })
+
+onMounted(() => {
+  // 进页面稍等一下再开始，让用户先看清牌阵
+  after(600, start)
+})
 
 onUnmounted(clearTimers)
 </script>
 
 <template>
   <view class="reveal" :class="[rarityClass, `reveal--${phase}`]">
-    <!-- ── 爆闪 ─────────────────────────────────────── -->
-    <view v-if="phase === 'burst' || phase === 'banner'" class="reveal__flash" />
-
-    <!-- ── 光芒放射 ─────────────────────────────────── -->
-    <view v-if="phase !== 'spread' && phase !== 'lifting'" class="reveal__rays">
-      <view
-        v-for="i in 12"
-        :key="i"
-        class="reveal__ray"
-        :style="{ transform: `rotate(${i * 30}deg)` }"
-      />
+    <!-- ══ 光芒（只在演出中）═════════════════════════ -->
+    <view v-if="phase !== 'deck' && phase !== 'rolling'" class="rays">
+      <view class="rays__spin">
+        <view
+          v-for="i in 12"
+          :key="i"
+          class="rays__line"
+          :style="{ transform: `rotate(${i * 30}deg)` }"
+        />
+      </view>
     </view>
 
-    <!-- ══ 牌阵：全部背面朝上，由用户挑 ═══════════════ -->
-    <view v-if="phase === 'spread' || phase === 'lifting'" class="spread">
-      <text class="spread__hint">
-        {{ phase === 'lifting' ? '揭晓中…' : '挑一张' }}
+    <!-- ══ 爆闪 ═══════════════════════════════════════ -->
+    <view v-if="phase === 'burst' || phase === 'banner'" class="flash" />
+
+    <!-- ══ 牌阵 ═══════════════════════════════════════ -->
+    <view v-if="showDeck" class="deck">
+      <text class="deck__hint">
+        {{ phase === 'deck' ? '准备抽卡…' : phase === 'rolling' ? '抽卡中…' : '揭晓！' }}
       </text>
 
-      <view class="spread__deck">
+      <view class="deck__row">
         <view
           v-for="(item, i) in spread"
           :key="item.dishId"
           class="back"
           :class="{
-            'back--picked': pickedIndex === i,
-            'back--dimmed': pickedIndex >= 0 && pickedIndex !== i,
+            'back--cursor': cursor === i && phase !== 'lifting',
+            'back--landed': landed === i,
+            'back--out': landed >= 0 && landed !== i,
           }"
-          :style="cardStyle(i, spread.length)"
-          hover-class="hover-dim"
-          @tap="onPickCard(i)"
         >
-          <view class="back__face">
-            <text class="back__glyph">🍜</text>
-            <view class="back__lines">
-              <view v-for="n in 3" :key="n" class="back__line" />
-            </view>
+          <text class="back__glyph">🍜</text>
+          <view class="back__lines">
+            <view v-for="n in 3" :key="n" class="back__line" />
           </view>
         </view>
       </view>
 
-      <text class="spread__sub">从 {{ spread.length }} 张里选一张</text>
+      <text class="deck__sub">{{ spread.length }} 张候选 · 系统为你抽</text>
     </view>
 
     <!-- ══ 稀有度横幅 ═════════════════════════════════ -->
-    <view v-if="phase === 'banner' || phase === 'card' || phase === 'detail' || phase === 'done'" class="banner">
+    <view v-if="showBanner" class="banner">
       <text class="banner__stars">{{ stars }}</text>
       <text class="banner__key">{{ rarity.key }}</text>
       <text class="banner__label">{{ rarity.label }}</text>
     </view>
 
     <!-- ══ 卡牌 ═══════════════════════════════════════ -->
-    <view
-      v-if="(phase === 'card' || phase === 'detail' || phase === 'done') && revealed"
-      class="card"
-      :class="{ 'card--settled': phase !== 'card' }"
-    >
+    <view v-if="showCard && revealed" class="card" :class="{ 'card--settled': phase !== 'card' }">
       <view class="card__shine" />
 
       <view class="card__head">
@@ -263,7 +299,7 @@ onUnmounted(clearTimers)
 
       <view class="card__score-row">
         <AnimatedNumber class="card__score" :value="revealed.score" :decimals="1" :duration="900" />
-        <text class="card__score-unit">分</text>
+        <text class="card__unit">分</text>
       </view>
 
       <view class="card__reasons">
@@ -276,38 +312,34 @@ onUnmounted(clearTimers)
       <text v-if="metaLine" class="card__meta">{{ metaLine }}</text>
     </view>
 
-    <!-- ══ 详情：食材 / 口感 / 做法 ═══════════════════ -->
-    <view
-      v-if="phase === 'detail' || phase === 'done'"
-      class="detail anim-in"
-    >
+    <!-- ══ 详情 ═══════════════════════════════════════ -->
+    <view v-if="showDetail" class="detail anim-in">
       <!-- 口感 -->
-      <view class="detail__block">
-        <view class="detail__head">
-          <text class="detail__mark">TASTE</text>
-          <text class="detail__title">口感</text>
+      <view class="block">
+        <view class="block__head">
+          <text class="block__mark">TASTE</text>
+          <text class="block__title">口感</text>
         </view>
-        <text class="detail__taste">{{ taste }}</text>
+        <text class="block__text">{{ taste }}</text>
       </view>
 
       <!-- 食材 -->
-      <view class="detail__block">
-        <view class="detail__head">
-          <text class="detail__mark">NEED</text>
-          <text class="detail__title">需要什么</text>
+      <view class="block">
+        <view class="block__head">
+          <text class="block__mark">NEED</text>
+          <text class="block__title">需要什么</text>
         </view>
 
-        <text v-if="detailLoading" class="detail__loading">读取中…</text>
-        <text v-else-if="detailError" class="detail__err">{{ detailError }}</text>
-        <text v-else-if="!detail?.ingredients.length" class="detail__loading">
+        <text v-if="detailLoading" class="block__dim">读取中…</text>
+        <text v-else-if="detailError" class="block__err">{{ detailError }}</text>
+        <text v-else-if="!detail?.ingredients.length" class="block__dim">
           这道菜还没录入食材信息
         </text>
 
         <view v-else class="ings">
           <view v-for="(ing, i) in detail.ingredients" :key="i" class="ing">
             <text class="ing__name">
-              {{ ing.name }}
-              <text v-if="ing.isCommonAllergen" class="ing__allergen">过敏原</text>
+              {{ ing.name }}<text v-if="ing.isCommonAllergen" class="ing__allergen">过敏原</text>
             </text>
             <text class="ing__amount">{{ ing.amount ?? '适量' }}</text>
           </view>
@@ -315,17 +347,17 @@ onUnmounted(clearTimers)
       </view>
 
       <!-- 做法 -->
-      <view class="detail__block">
-        <view class="detail__head">
-          <text class="detail__mark">HOW</text>
-          <text class="detail__title">怎么做</text>
-          <text v-if="detail?.recipe" class="detail__badge">
+      <view class="block">
+        <view class="block__head">
+          <text class="block__mark">HOW</text>
+          <text class="block__title">怎么做</text>
+          <text v-if="detail?.recipe" class="block__badge">
             {{ detail.recipe.servings }} 人份 · {{ detail.recipe.cookMinutes }} 分钟 ·
             {{ detail.recipe.difficultyLabel }}
           </text>
         </view>
 
-        <text v-if="detailLoading" class="detail__loading">读取中…</text>
+        <text v-if="detailLoading" class="block__dim">读取中…</text>
 
         <template v-else-if="detail?.recipe">
           <view class="steps">
@@ -344,27 +376,31 @@ onUnmounted(clearTimers)
           </view>
         </template>
 
-        <text v-else class="detail__loading">
-          这道菜还没有做法。去菜品详情页可以一键让 AI 生成。
+        <text v-else class="block__dim">
+          这道菜还没有做法。去菜品详情页可以让 AI 一键生成。
         </text>
       </view>
     </view>
 
-    <!-- ══ 底部提示 ═══════════════════════════════════ -->
-    <text v-if="phase === 'done'" class="reveal__congrats anim-pop">— 抽到了 —</text>
+    <text v-if="phase === 'done'" class="congrats anim-pop">— 抽到了 —</text>
   </view>
 </template>
 
 <style lang="scss" scoped>
+/* ═══════════════════════════════════════════════════════════
+ *  布局原则：容器只管纵向排列，所有特效层用 absolute 且居中。
+ *  上一版把光芒层设成 1100rpx 宽却只给了 top 没给 left，
+ *  它的静态位置把整个页面撑歪了 —— 这是"样式崩了"的根因。
+ * ═══════════════════════════════════════════════════════════ */
 .reveal {
   position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
-  padding-bottom: $fm-gap-lg;
+  padding: $fm-gap-md 0 $fm-gap-lg;
 
-  /* 稀有度色 */
   &--n {
     --r: #6b7a94;
   }
@@ -377,160 +413,38 @@ onUnmounted(clearTimers)
   &--ssr {
     --r: #ffc53d;
   }
-
-  /* 牌阵阶段要撑高，避免布局跳动 */
-  &--spread,
-  &--lifting {
-    min-height: 720rpx;
-    justify-content: center;
-  }
-}
-
-/* ═══ 牌阵 ═══════════════════════════════════════════════════ */
-.spread {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-
-  &__hint {
-    font-family: $cy-mono;
-    font-size: 26rpx;
-    letter-spacing: 6rpx;
-    color: $cy-cyan;
-    text-shadow: 0 0 14rpx rgba(0, 240, 255, 0.9);
-    animation: fm-pulse 1.8s ease-in-out infinite;
-  }
-
-  &__deck {
-    position: relative;
-    height: 520rpx;
-    width: 100%;
-    margin-top: $fm-gap-lg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  &__sub {
-    margin-top: $fm-gap-md;
-    @include hud-label();
-  }
-}
-
-/* ── 背面牌 ───────────────────────────────────────────────── */
-.back {
-  position: absolute;
-  width: 260rpx;
-  height: 400rpx;
-  border-radius: $fm-radius-md;
-  transition:
-    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s ease,
-    box-shadow 0.3s ease;
-
-  &__face {
-    width: 100%;
-    height: 100%;
-    border-radius: $fm-radius-md;
-    background:
-      repeating-linear-gradient(
-        45deg,
-        rgba(0, 240, 255, 0.08) 0px,
-        rgba(0, 240, 255, 0.08) 8rpx,
-        transparent 8rpx,
-        transparent 18rpx
-      ),
-      linear-gradient(160deg, #12203a, #06060f);
-    border: 2px solid rgba(0, 240, 255, 0.5);
-    box-shadow:
-      0 0 6rpx rgba(0, 240, 255, 0.6),
-      0 0 22rpx rgba(0, 240, 255, 0.25);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 18rpx;
-  }
-
-  &__glyph {
-    font-size: 76rpx;
-    filter: drop-shadow(0 0 16rpx rgba(0, 240, 255, 0.8));
-    opacity: 0.85;
-  }
-
-  &__lines {
-    display: flex;
-    flex-direction: column;
-    gap: 8rpx;
-    width: 60%;
-  }
-
-  &__line {
-    height: 3rpx;
-    border-radius: 999rpx;
-    background: rgba(0, 240, 255, 0.35);
-  }
-
-  /* 选中的那张：飞出牌阵、放大 */
-  &--picked {
-    transform: translateY(-60rpx) scale(1.16) rotate(0deg) !important;
-    z-index: 40 !important;
-    box-shadow:
-      0 0 12rpx rgba(0, 240, 255, 0.9),
-      0 0 50rpx rgba(0, 240, 255, 0.5);
-  }
-
-  /* 其余牌：退场 */
-  &--dimmed {
-    opacity: 0;
-    transform: translateY(60rpx) scale(0.8) !important;
-  }
-}
-
-/* ═══ 爆闪 ═══════════════════════════════════════════════════ */
-.reveal__flash {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 40%, #fff 0%, rgba(255, 255, 255, 0.5) 35%, transparent 72%);
-  animation: flash 0.75s ease-out both;
-  pointer-events: none;
-  z-index: 30;
-}
-
-@keyframes flash {
-  0% {
-    opacity: 0;
-  }
-  12% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
 }
 
 /* ═══ 光芒 ═══════════════════════════════════════════════════ */
-.reveal__rays {
+.rays {
   position: absolute;
-  top: 60rpx;
-  width: 1100rpx;
-  height: 1100rpx;
-  animation: rays-spin 14s linear infinite;
-  pointer-events: none;
-  opacity: 0.45;
-}
-
-.reveal__ray {
-  position: absolute;
+  top: -80rpx;
   left: 50%;
-  top: 0;
-  width: 3rpx;
-  height: 550rpx;
-  margin-left: -1.5rpx;
-  transform-origin: 50% 100%;
-  background: linear-gradient(180deg, transparent, var(--r));
-  opacity: 0.35;
+  width: 900rpx;
+  height: 900rpx;
+  margin-left: -450rpx;
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 0;
+
+  &__spin {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    animation: rays-spin 16s linear infinite;
+  }
+
+  &__line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 3rpx;
+    height: 450rpx;
+    margin-left: -1.5rpx;
+    transform-origin: 50% 100%;
+    background: linear-gradient(180deg, transparent, var(--r));
+    opacity: 0.4;
+  }
 }
 
 @keyframes rays-spin {
@@ -539,18 +453,146 @@ onUnmounted(clearTimers)
   }
 }
 
+/* ═══ 爆闪 ═══════════════════════════════════════════════════ */
+.flash {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 900rpx;
+  height: 900rpx;
+  margin-left: -450rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 255, 255, 0.45) 32%, transparent 68%);
+  animation: flash 0.7s ease-out both;
+  pointer-events: none;
+  z-index: 30;
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+/* ═══ 牌阵 ═══════════════════════════════════════════════════ */
+.deck {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+
+  &__hint {
+    font-family: $cy-mono;
+    font-size: 26rpx;
+    letter-spacing: 6rpx;
+    color: $cy-cyan;
+    text-shadow: 0 0 14rpx rgba(0, 240, 255, 0.9);
+  }
+
+  /* 横向一排，用 flex 而不是绝对定位 —— 真机上不会错位 */
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14rpx;
+    margin: $fm-gap-lg 0;
+    width: 100%;
+  }
+
+  &__sub {
+    @include hud-label();
+  }
+}
+
+/* ── 背面牌 ───────────────────────────────────────────────── */
+.back {
+  width: 116rpx;
+  height: 180rpx;
+  flex-shrink: 0;
+  border-radius: $fm-radius-sm;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 240, 255, 0.09) 0px,
+      rgba(0, 240, 255, 0.09) 6rpx,
+      transparent 6rpx,
+      transparent 14rpx
+    ),
+    linear-gradient(160deg, #12203a, #06060f);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  transition: all 0.22s ease;
+
+  &__glyph {
+    font-size: 40rpx;
+    opacity: 0.8;
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 5rpx;
+    width: 58%;
+  }
+
+  &__line {
+    height: 2rpx;
+    border-radius: 999rpx;
+    background: rgba(0, 240, 255, 0.3);
+  }
+
+  /* 光标扫到这张 */
+  &--cursor {
+    transform: translateY(-14rpx) scale(1.1);
+    border-color: $cy-cyan;
+    box-shadow:
+      0 0 8rpx rgba(0, 240, 255, 0.9),
+      0 0 26rpx rgba(0, 240, 255, 0.55);
+  }
+
+  /* 落定：放大、加亮 */
+  &--landed {
+    transform: translateY(-26rpx) scale(1.24);
+    border-color: var(--r);
+    box-shadow:
+      0 0 12rpx var(--r),
+      0 0 44rpx var(--r);
+    z-index: 20;
+  }
+
+  /* 其余牌：淡出 */
+  &--out {
+    opacity: 0.15;
+    transform: scale(0.86);
+  }
+}
+
 /* ═══ 稀有度横幅 ═════════════════════════════════════════════ */
 .banner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rpx;
+  gap: 2rpx;
   padding: $fm-gap-md 0;
   z-index: 20;
   animation: banner-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   &__stars {
-    font-size: 34rpx;
+    font-size: 32rpx;
     letter-spacing: 8rpx;
     color: var(--r);
     text-shadow: 0 0 18rpx var(--r);
@@ -558,14 +600,13 @@ onUnmounted(clearTimers)
 
   &__key {
     font-family: $cy-mono;
-    font-size: 68rpx;
+    font-size: 64rpx;
     font-weight: 900;
     letter-spacing: 12rpx;
     color: var(--r);
     text-shadow:
       0 0 8rpx var(--r),
-      0 0 30rpx var(--r),
-      0 0 70rpx var(--r);
+      0 0 30rpx var(--r);
   }
 
   &__label {
@@ -579,11 +620,11 @@ onUnmounted(clearTimers)
 @keyframes banner-in {
   0% {
     opacity: 0;
-    transform: translateY(-40rpx) scale(0.7);
+    transform: translateY(-30rpx) scale(0.75);
   }
   60% {
     opacity: 1;
-    transform: translateY(0) scale(1.08);
+    transform: translateY(0) scale(1.06);
   }
   100% {
     transform: scale(1);
@@ -593,7 +634,8 @@ onUnmounted(clearTimers)
 /* ═══ 卡牌 ═══════════════════════════════════════════════════ */
 .card {
   position: relative;
-  width: 580rpx;
+  width: 100%;
+  max-width: 580rpx;
   padding: $fm-gap-lg;
   border-radius: $fm-radius-lg;
   background:
@@ -602,14 +644,13 @@ onUnmounted(clearTimers)
   border: 2px solid var(--r);
   box-shadow:
     0 0 8rpx var(--r),
-    0 0 32rpx rgba(255, 255, 255, 0.14),
-    inset 0 0 60rpx rgba(255, 255, 255, 0.05);
+    0 0 30rpx rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
   z-index: 15;
-  animation: card-drop 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: card-drop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   &--settled {
     animation: none;
@@ -621,7 +662,7 @@ onUnmounted(clearTimers)
     left: -60%;
     width: 45%;
     height: 180%;
-    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.38), transparent);
     transform: rotate(18deg);
     animation: card-shine 1.1s ease-out 0.3s 1 both;
     pointer-events: none;
@@ -656,9 +697,10 @@ onUnmounted(clearTimers)
 
   &__name {
     margin-top: $fm-gap-md;
-    font-size: 54rpx;
+    font-size: 52rpx;
     font-weight: 800;
-    letter-spacing: 4rpx;
+    letter-spacing: 3rpx;
+    text-align: center;
     color: $cy-text;
     text-shadow:
       0 0 20rpx rgba(0, 240, 255, 0.5),
@@ -680,13 +722,13 @@ onUnmounted(clearTimers)
   }
 
   &__score {
-    font-size: 54rpx;
+    font-size: 52rpx;
     font-weight: 900;
     color: var(--r);
     text-shadow: 0 0 18rpx var(--r);
   }
 
-  &__score-unit {
+  &__unit {
     font-family: $cy-mono;
     font-size: 22rpx;
     color: $cy-text-faint;
@@ -734,14 +776,14 @@ onUnmounted(clearTimers)
 @keyframes card-drop {
   0% {
     opacity: 0;
-    transform: translateY(120rpx) scale(0.55) rotate(-8deg);
+    transform: translateY(90rpx) scale(0.6);
   }
   65% {
     opacity: 1;
-    transform: translateY(0) scale(1.05) rotate(1deg);
+    transform: translateY(0) scale(1.04);
   }
   100% {
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -766,19 +808,20 @@ onUnmounted(clearTimers)
   display: flex;
   flex-direction: column;
   gap: $fm-gap-md;
+}
 
-  &__block {
-    padding: $fm-gap-md $fm-gap-lg;
-    background: $cy-surface;
-    border: 1px solid rgba(0, 240, 255, 0.22);
-    border-radius: $fm-radius-md;
-  }
+.block {
+  padding: $fm-gap-md $fm-gap-lg;
+  background: $cy-surface;
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  border-radius: $fm-radius-md;
 
   &__head {
     display: flex;
     align-items: baseline;
     gap: 12rpx;
     margin-bottom: $fm-gap-md;
+    flex-wrap: wrap;
   }
 
   &__mark {
@@ -804,20 +847,22 @@ onUnmounted(clearTimers)
     color: $cy-text-faint;
   }
 
-  &__taste {
+  &__text {
     font-size: 27rpx;
     line-height: 1.7;
     color: $cy-text-dim;
   }
 
-  &__loading,
-  &__err {
+  &__dim {
     font-family: $cy-mono;
     font-size: 22rpx;
+    line-height: 1.7;
     color: $cy-text-faint;
   }
 
   &__err {
+    font-family: $cy-mono;
+    font-size: 22rpx;
     color: $cy-red;
   }
 }
@@ -832,6 +877,7 @@ onUnmounted(clearTimers)
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: $fm-gap-md;
   padding: 14rpx 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 
@@ -857,6 +903,7 @@ onUnmounted(clearTimers)
     font-family: $cy-mono;
     font-size: 23rpx;
     color: $cy-text-faint;
+    flex-shrink: 0;
   }
 }
 
@@ -885,7 +932,6 @@ onUnmounted(clearTimers)
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 10rpx rgba(0, 240, 255, 0.35);
   }
 
   &__body {
@@ -931,8 +977,8 @@ onUnmounted(clearTimers)
   }
 }
 
-/* ═══ 完成提示 ═══════════════════════════════════════════════ */
-.reveal__congrats {
+/* ═══ 完成 ═══════════════════════════════════════════════════ */
+.congrats {
   margin-top: $fm-gap-lg;
   font-family: $cy-mono;
   font-size: 24rpx;
