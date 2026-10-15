@@ -21,6 +21,13 @@
       }
     },
     {
+      "path": "pages/dish/list",
+      "style": {
+        "navigationBarTitleText": "菜品库",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
       "path": "pages/dish/detail",
       "style": {
         "navigationBarTitleText": "菜品详情"

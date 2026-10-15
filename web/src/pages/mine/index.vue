@@ -120,6 +120,11 @@ function onOpenRecords() {
   uni.switchTab({ url: '/pages/records/index' })
 }
 
+/** 打开菜品库。 */
+function onOpenDishList() {
+  uni.navigateTo({ url: '/pages/dish/list' })
+}
+
 async function onRecheck() {
   checking.value = true
   await meta.checkConnection()
@@ -195,6 +200,11 @@ onShow(() => {
       <view class="menu__item" hover-class="hover-dim" @tap="onOpenPreference">
         <text class="menu__label">口味画像</text>
         <text class="menu__hint">辣度 · 预算 · 忌口 · 偏好菜系</text>
+        <text class="menu__arrow">›</text>
+      </view>
+      <view class="menu__item" hover-class="hover-dim" @tap="onOpenDishList">
+        <text class="menu__label">菜品库</text>
+        <text class="menu__hint">301 道菜 · 搜索与筛选</text>
         <text class="menu__arrow">›</text>
       </view>
       <view class="menu__item" hover-class="hover-dim" @tap="onOpenStats">
