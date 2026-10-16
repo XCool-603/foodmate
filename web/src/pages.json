@@ -60,6 +60,12 @@
       }
     },
     {
+      "path": "pages/ai/shopping",
+      "style": {
+        "navigationBarTitleText": "买菜清单"
+      }
+    },
+    {
       "path": "pages/ai/confirm",
       "style": {
         "navigationBarTitleText": "确认识别结果"

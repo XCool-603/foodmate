@@ -125,6 +125,11 @@ function onOpenDishList() {
   uni.navigateTo({ url: '/pages/dish/list' })
 }
 
+/** 打开买菜清单。 */
+function onOpenShopping() {
+  uni.navigateTo({ url: '/pages/ai/shopping' })
+}
+
 async function onRecheck() {
   checking.value = true
   await meta.checkConnection()
@@ -205,6 +210,11 @@ onShow(() => {
       <view class="menu__item" hover-class="hover-dim" @tap="onOpenDishList">
         <text class="menu__label">菜品库</text>
         <text class="menu__hint">301 道菜 · 搜索与筛选</text>
+        <text class="menu__arrow">›</text>
+      </view>
+      <view class="menu__item" hover-class="hover-dim" @tap="onOpenShopping">
+        <text class="menu__label">买菜清单</text>
+        <text class="menu__hint">选几道菜，算要买什么</text>
         <text class="menu__arrow">›</text>
       </view>
       <view class="menu__item" hover-class="hover-dim" @tap="onOpenStats">

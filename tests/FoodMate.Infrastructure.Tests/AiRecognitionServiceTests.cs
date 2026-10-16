@@ -621,8 +621,19 @@ public class AiRecognitionServiceTests : SqliteTestBase
     public async Task 生成买菜清单应汇总多道菜()
     {
         var user = await SeedUserAsync();
-        var a = await SeedDishAsync("番茄牛腩");
-        var b = await SeedDishAsync("西红柿炒蛋");
+
+        // 真实菜品都有食材 —— 聚合结果完全来自数据库，不依赖模型
+        var a = await SeedDishAsync("番茄牛腩", ingredients:
+        [
+            new Ingredient("牛腩", "500g"),
+            new Ingredient("番茄", "3个"),
+        ]);
+
+        var b = await SeedDishAsync("西红柿炒蛋", ingredients:
+        [
+            new Ingredient("番茄", "2个"),
+            new Ingredient("鸡蛋", "3个", true),
+        ]);
 
         var service = CreateService(Db, new FakeVisionClient());
         var list = await service.GenerateShoppingListAsync(user.Id, new ShoppingListRequest
@@ -632,7 +643,35 @@ public class AiRecognitionServiceTests : SqliteTestBase
         });
 
         Assert.NotEmpty(list.Items);
+
+        // 番茄被两道菜共用 → 用量并列，并标记为共用。
+        // 不断言顺序：菜品从数据库取回的顺序不保证与传入顺序一致。
+        var tomato = list.Items.Single(i => i.Name == "番茄");
+        Assert.Contains("3个", tomato.TotalAmount);
+        Assert.Contains("2个", tomato.TotalAmount);
+        Assert.Equal(2, tomato.ForDishes.Count);
         Assert.Contains("番茄", list.TextSummary);
+    }
+
+    [Fact]
+    public async Task 买菜清单在菜品无食材数据时应给出提示而非空列表()
+    {
+        var user = await SeedUserAsync();
+
+        // 两道菜都没录食材
+        var a = await SeedDishAsync("神秘料理A");
+        var b = await SeedDishAsync("神秘料理B");
+
+        var service = CreateService(Db, new FakeVisionClient());
+        var list = await service.GenerateShoppingListAsync(user.Id, new ShoppingListRequest
+        {
+            DishIds = [a.Id, b.Id],
+            Servings = 2,
+        });
+
+        // 不能返回空列表让用户对着白屏发呆
+        Assert.NotEmpty(list.Items);
+        Assert.Contains("食材", list.TextSummary);
     }
 
     [Fact]

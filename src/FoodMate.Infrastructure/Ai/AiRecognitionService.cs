@@ -366,6 +366,17 @@ public sealed class AiRecognitionService(
     }
 
     /// <summary>生成买菜清单。</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>聚合食材是纯数据工作，不依赖模型</b>：把选中菜品的食材按名合并、
+    /// 记录每样食材服务于哪几道菜。这份聚合结果就是<b>基线清单</b>。
+    /// </para>
+    /// <para>
+    /// 模型只做「增强」——把同类食材归到一组、把单位换算得更合理、补上采购提示。
+    /// 所以：桩模型下返回的是**真实可用的清单**（不是占位符），
+    /// 真实模型不可用时也能回落到它。
+    /// </para>
+    /// </remarks>
     public async Task<ShoppingListDto> GenerateShoppingListAsync(
         Guid userId,
         ShoppingListRequest request,
@@ -376,41 +387,151 @@ public sealed class AiRecognitionService(
             throw BusinessException.Validation("请至少选择一道菜。");
         }
 
-        var names = await db.Dishes
+        var servings = request.Servings <= 0 ? (short)2 : request.Servings;
+
+        var dishes = await db.Dishes
             .AsNoTracking()
             .Where(d => request.DishIds.Contains(d.Id) && !d.IsDeleted)
-            .Select(d => d.Name)
+            .Select(d => new { d.Name, d.Ingredients })
             .ToListAsync(ct);
 
-        if (names.Count == 0)
+        if (dishes.Count == 0)
         {
             throw BusinessException.NotFound("选中的菜品都不存在。");
         }
 
-        await EnsureTextQuotaAsync(userId, ct);
+        var baseline = AggregateIngredients(dishes.Select(d => (d.Name, d.Ingredients)), servings);
 
-        ShoppingList list;
+        // 一道菜都没录食材时，别返回空列表让用户对着白屏发呆。
+        // 如实说明是数据缺失，而不是假装清单是空的。
+        if (baseline.Count == 0)
+        {
+            var missing = string.Join("、", dishes.Select(d => d.Name));
+
+            return new ShoppingListDto
+            {
+                Items =
+                [
+                    new ShoppingItemDto(
+                        Name: "这些菜还没有录入食材",
+                        TotalAmount: null,
+                        Category: "数据缺失",
+                        ForDishes: [.. dishes.Select(d => d.Name)]),
+                ],
+                TextSummary = $"{missing} 还没有录入食材信息，无法生成采购清单。\n"
+                    + "可以在菜品详情页补充，或换几道菜试试。",
+                IsStubModel = true,
+            };
+        }
+
+        // 桩模型：直接返回真实聚合结果，不编造、不占位
+        if (text.IsStub)
+        {
+            return new ShoppingListDto
+            {
+                Items = [.. baseline.Select(i => new ShoppingItemDto(i.Name, i.TotalAmount, i.Category, i.ForDishes))],
+                TextSummary = BuildSummary(baseline, servings),
+                IsStubModel = true,
+            };
+        }
+
+        await EnsureTextQuotaAsync(userId, ct);
 
         try
         {
-            list = await text.GenerateShoppingListAsync(
-                names,
-                request.Servings <= 0 ? (short)2 : request.Servings,
+            var list = await text.GenerateShoppingListAsync(
+                [.. dishes.Select(d => d.Name)],
+                servings,
                 ct);
+
+            return new ShoppingListDto
+            {
+                Items = [.. list.Items.Select(i => new ShoppingItemDto(i.Name, i.TotalAmount, i.Category, i.ForDishes))],
+                TextSummary = list.TextSummary,
+                IsStubModel = text.IsStub,
+            };
         }
         catch (AiClientException ex)
         {
-            throw new BusinessException(
-                ex.IsTimeout ? ApiErrorCode.AiTimeout : ApiErrorCode.AiRecognitionFailed,
-                $"买菜清单生成失败：{ex.Message}");
+            // 模型挂了不该让整个功能失败 —— 回落到已经算好的基线清单。
+            // 这就是「AI 是增强不是依赖」在买菜清单上的具体体现。
+            logger.LogWarning(ex, "买菜清单模型调用失败，回落到本地聚合结果");
+
+            return new ShoppingListDto
+            {
+                Items = [.. baseline.Select(i => new ShoppingItemDto(i.Name, i.TotalAmount, i.Category, i.ForDishes))],
+                TextSummary = BuildSummary(baseline, servings),
+                IsStubModel = true,
+            };
+        }
+    }
+
+    /// <summary>把多道菜的食材按名合并成采购清单。</summary>
+    private static List<ShoppingListItem> AggregateIngredients(
+        IEnumerable<(string DishName, List<Ingredient> Ingredients)> dishes,
+        short servings)
+    {
+        // 有序字典：保持食材首次出现的顺序，比字母序更符合采购直觉
+        var buckets = new Dictionary<string, (List<string> Amounts, List<string> Dishes)>(
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (dishName, ingredients) in dishes)
+        {
+            foreach (var ing in ingredients)
+            {
+                if (string.IsNullOrWhiteSpace(ing.Name))
+                {
+                    continue;
+                }
+
+                if (!buckets.TryGetValue(ing.Name, out var bucket))
+                {
+                    bucket = ([], []);
+                    buckets[ing.Name] = bucket;
+                }
+
+                if (!string.IsNullOrWhiteSpace(ing.Amount))
+                {
+                    bucket.Amounts.Add(ing.Amount);
+                }
+
+                if (!bucket.Dishes.Contains(dishName))
+                {
+                    bucket.Dishes.Add(dishName);
+                }
+            }
         }
 
-        return new ShoppingListDto
+        var items = new List<ShoppingListItem>(buckets.Count);
+
+        foreach (var (name, bucket) in buckets)
         {
-            Items = [.. list.Items.Select(i => new ShoppingItemDto(i.Name, i.TotalAmount, i.Category, i.ForDishes))],
-            TextSummary = list.TextSummary,
-            IsStubModel = text.IsStub,
-        };
+            // 同一食材在多道菜里出现时，把用量并排列出 —— 不做单位换算，
+            // 因为「2勺 + 100g」这种混单位没法可靠相加，如实呈现更诚实。
+            var amount = bucket.Amounts.Count switch
+            {
+                0 => null,
+                1 => bucket.Amounts[0],
+                _ => string.Join(" + ", bucket.Amounts),
+            };
+
+            items.Add(new ShoppingListItem(
+                Name: name,
+                TotalAmount: amount,
+                Category: bucket.Dishes.Count > 1 ? "多道菜共用" : null,
+                ForDishes: bucket.Dishes));
+        }
+
+        return items;
+    }
+
+    /// <summary>纯文本清单，便于复制。</summary>
+    private static string BuildSummary(IReadOnlyList<ShoppingListItem> items, short servings)
+    {
+        var lines = items.Select(i =>
+            $"· {i.Name}{(string.IsNullOrWhiteSpace(i.TotalAmount) ? string.Empty : $"  {i.TotalAmount}")}");
+
+        return $"买菜清单（{servings} 人份）\n{string.Join("\n", lines)}";
     }
 
     // ── 内部实现 ────────────────────────────────────────────
